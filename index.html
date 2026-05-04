@@ -1,0 +1,2304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mini Chart Reading — Practical Module</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Questrial&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --navy:#0c1118;--navy2:#141d2b;
+  --cream:#f0ebe0;--cream-70:rgba(240,235,224,0.70);--cream-40:rgba(240,235,224,0.40);
+  --cream-18:rgba(240,235,224,0.18);--cream-10:rgba(240,235,224,0.10);--cream-06:rgba(240,235,224,0.06);
+  --purple:#7B6FE8;--purple-light:rgba(123,111,232,0.18);--purple-dim:rgba(123,111,232,0.10);
+  --coral:#E8604C;--cyan:#4FC3F7;--magenta:#E040FB;--green:#6FFFB0;--gold:#FFD54F;
+}
+html{scroll-behavior:smooth}
+body{background:var(--navy);color:var(--cream);font-family:'Questrial',sans-serif;font-size:16px;line-height:1.75;overflow-x:hidden}
+h1,h2,h3,h4{font-family:'Lora',serif;font-weight:600;line-height:1.2}
+.container{max-width:1180px;margin:0 auto;padding:0 32px}
+section{padding:90px 0;position:relative}
+em{font-style:italic}strong{color:var(--cream)}
+
+/* ───── HEADER ───── */
+header{position:sticky;top:0;z-index:100;background:rgba(12,17,24,0.92);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid var(--cream-10);padding:15px 0}
+.head-row{display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:14px}
+.logo-wordmark{font-family:'Questrial',sans-serif;font-size:0.95rem;color:var(--cream);letter-spacing:0.03em}
+.logo-sep{width:1px;height:18px;background:var(--cream-40)}
+.logo-sub{font-size:0.85rem;color:var(--cream-70)}
+.head-progress{display:flex;align-items:center;gap:14px;font-size:0.78rem;color:var(--cream-70);letter-spacing:0.08em;text-transform:uppercase}
+.head-bar{width:120px;height:4px;border-radius:2px;background:var(--cream-10);overflow:hidden}
+.head-bar-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--purple),var(--magenta));transition:width .4s}
+
+/* ───── HERO ───── */
+.hero{padding:96px 0 80px}
+.hero-tag{display:inline-flex;align-items:center;gap:8px;font-size:0.75rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--purple);background:var(--purple-light);border:1px solid rgba(123,111,232,0.35);border-radius:100px;padding:6px 16px;margin-bottom:1.6rem}
+.hero h1{font-size:clamp(2.2rem,4.6vw,3.4rem);margin-bottom:1.1rem}
+.hero h1 .accent{font-style:italic;color:var(--purple)}
+.hero-lead{font-size:1.08rem;color:var(--cream-70);max-width:640px;line-height:1.7;margin-bottom:2.6rem}
+.hero-meta{display:flex;flex-wrap:wrap;gap:24px;color:var(--cream-70);font-size:0.85rem;letter-spacing:0.04em}
+.hero-meta .dot{width:5px;height:5px;border-radius:50%;background:var(--cream-40);align-self:center}
+
+/* ───── TRACK CHOICE CARDS ───── */
+.track-choose{padding-top:30px;padding-bottom:60px}
+.track-choose .eyebrow{display:block;font-size:0.72rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--purple);margin-bottom:0.75rem;text-align:center}
+.track-choose h2{text-align:center;font-size:clamp(1.6rem,3vw,2.2rem);margin-bottom:0.6rem}
+.track-choose p.lead{text-align:center;color:var(--cream-70);max-width:560px;margin:0 auto 3rem}
+.track-grid{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+.track-card{position:relative;border-radius:24px;overflow:hidden;cursor:pointer;border:1px solid var(--cream-10);background:#000;aspect-ratio:5/4;transition:transform .35s ease,border-color .35s ease,box-shadow .35s ease;outline:none}
+.track-card:hover,.track-card:focus-visible{transform:translateY(-4px);border-color:rgba(123,111,232,0.55);box-shadow:0 30px 80px rgba(123,111,232,0.18)}
+.track-card.active{border-color:var(--purple);box-shadow:0 30px 80px rgba(123,111,232,0.28)}
+.track-card img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .8s ease,filter .8s ease;filter:saturate(1.05) brightness(.78)}
+.track-card:hover img{transform:scale(1.04)}
+.track-card::after{content:'';position:absolute;inset:0;background:linear-gradient(165deg,rgba(12,17,24,0.10) 0%,rgba(12,17,24,0.55) 55%,rgba(12,17,24,0.92) 100%);pointer-events:none}
+.track-card .label{position:absolute;inset:auto 0 0 0;padding:28px 30px 30px;z-index:2;color:var(--cream)}
+.track-card .label .kicker{font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--purple);margin-bottom:0.5rem;display:block}
+.track-card .label h3{font-size:clamp(1.4rem,2.4vw,1.9rem);margin-bottom:0.45rem;font-style:italic}
+.track-card .label p{color:var(--cream-70);font-size:0.93rem;line-height:1.55;max-width:380px}
+.track-card .pill{position:absolute;top:18px;right:18px;z-index:3;font-size:0.7rem;letter-spacing:0.16em;text-transform:uppercase;background:rgba(12,17,24,0.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid var(--cream-18);color:var(--cream-70);border-radius:100px;padding:6px 14px;transition:background .25s,color .25s,border-color .25s}
+.track-card.active .pill{background:var(--purple);color:#fff;border-color:var(--purple)}
+.track-card.active .pill .pill-text{display:none}
+.track-card.active .pill::after{content:'✓ Selected';font-size:0.7rem;letter-spacing:0.16em;text-transform:uppercase}
+
+/* ───── TRACK SWITCHER (sticky) ───── */
+.track-switch{position:sticky;top:62px;z-index:50;background:rgba(12,17,24,0.86);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--cream-10);padding:14px 0;display:none}
+.track-switch.show{display:block}
+.switch-row{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.switch-label{font-size:0.78rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--cream-70)}
+.switch-buttons{display:flex;gap:8px;background:var(--cream-06);border:1px solid var(--cream-10);border-radius:100px;padding:5px}
+.switch-btn{font-family:'Questrial',sans-serif;font-size:0.85rem;color:var(--cream-70);background:transparent;border:none;padding:8px 18px;border-radius:100px;cursor:pointer;transition:background .25s,color .25s}
+.switch-btn.active{background:var(--purple);color:#fff}
+.switch-btn:not(.active):hover{color:var(--cream)}
+
+/* ───── TRACK CONTENT ───── */
+.track-content{display:none}
+.track-content.active{display:block;animation:fadeIn .55s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+/* ───── FOUNDATION SECTION ───── */
+.foundation{background:linear-gradient(110deg,rgba(123,111,232,0.08) 0%,rgba(79,195,247,0.04) 100%);border-top:1px solid var(--cream-10);border-bottom:1px solid var(--cream-10)}
+.foundation .grid{display:grid;grid-template-columns:1.05fr 1fr;gap:60px;align-items:center}
+.eyebrow{display:block;font-size:0.72rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--purple);margin-bottom:0.75rem}
+.foundation h2{font-size:clamp(1.8rem,3.2vw,2.5rem);margin-bottom:1.4rem}
+.foundation h2 em{color:var(--purple)}
+.foundation p{color:var(--cream-70);margin-bottom:1.1rem;font-size:1rem}
+.tools{margin-top:1.8rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px}
+.tool{background:var(--cream-06);border:1px solid var(--cream-10);border-radius:12px;padding:14px 18px}
+.tool .t-name{font-family:'Lora',serif;font-style:italic;color:var(--cream);font-size:1.02rem;margin-bottom:3px}
+.tool .t-desc{font-size:0.85rem;color:var(--cream-70)}
+.foundation-deco{position:relative;border-radius:24px;overflow:hidden;aspect-ratio:1/1;border:1px solid var(--cream-10);background:linear-gradient(155deg,#1e2d48 0%,#0d1828 100%);display:flex;align-items:center;justify-content:center}
+.foundation-deco img{width:78%;height:auto}
+
+/* ───── STEP SECTIONS ───── */
+.step{position:relative}
+.step .step-head{display:flex;align-items:flex-start;gap:24px;margin-bottom:2.6rem;flex-wrap:wrap}
+.step-num{flex-shrink:0;width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Lora',serif;font-size:1.6rem;font-weight:700;color:var(--navy);background:var(--gold)}
+.step-num.n2{background:var(--coral);color:#fff}
+.step-num.n3{background:var(--cyan);color:var(--navy)}
+.step-num.n4{background:var(--magenta);color:#fff}
+.step-head .text{flex:1;min-width:280px}
+.step-head h2{font-size:clamp(1.7rem,3vw,2.3rem);margin-bottom:0.6rem}
+.step-head h2 em{color:var(--purple)}
+.step-head .sub{color:var(--cream-70);max-width:720px;font-size:1rem}
+
+.step .interplay{display:grid;grid-template-columns:1fr 1.05fr;gap:50px;align-items:start}
+
+/* chart card (clickable) */
+.chart-card{position:relative;border-radius:20px;overflow:hidden;border:1px solid var(--cream-10);background:#0c1118;cursor:pointer;transition:transform .3s ease,border-color .3s ease,box-shadow .3s ease;outline:none}
+.chart-card:hover,.chart-card:focus-visible{transform:translateY(-3px);border-color:rgba(123,111,232,0.45);box-shadow:0 30px 80px rgba(0,0,0,0.5)}
+.chart-card img{width:100%;height:auto;display:block;background:#fff}
+.chart-card .hint{position:absolute;left:18px;right:18px;bottom:18px;display:flex;justify-content:space-between;align-items:center;gap:12px;background:rgba(12,17,24,0.78);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--cream-18);border-radius:100px;padding:10px 18px;color:var(--cream);font-size:0.82rem;letter-spacing:0.05em;transition:background .25s,opacity .25s}
+.chart-card .hint .ico{display:inline-flex;width:22px;height:22px;border-radius:50%;background:var(--purple);color:#fff;align-items:center;justify-content:center;font-size:0.78rem}
+.chart-card.opened .hint{opacity:0.55}
+.chart-card .focus-tag{position:absolute;top:14px;left:14px;font-size:0.7rem;letter-spacing:0.16em;text-transform:uppercase;background:rgba(12,17,24,0.78);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid var(--cream-18);border-radius:100px;padding:5px 12px;color:var(--cream)}
+
+/* reading panel (revealed on click) */
+.reading{background:var(--cream-06);border:1px solid var(--cream-10);border-left:3px solid var(--purple);border-radius:18px;padding:26px 30px;color:var(--cream-70);font-size:0.97rem;line-height:1.78}
+.reading .placeholder{color:var(--cream-40);font-style:italic;text-align:center;padding:1.4rem 0}
+.reading .placeholder .ico{display:inline-flex;width:38px;height:38px;border-radius:50%;background:var(--purple-light);border:1px solid rgba(123,111,232,0.35);align-items:center;justify-content:center;color:var(--purple);margin-bottom:.7rem;font-size:1.1rem}
+.reading-content{display:none}
+.reading-content.show{display:block;animation:fadeIn .45s ease}
+.reading h4{font-family:'Lora',serif;font-style:italic;font-size:1.2rem;color:var(--cream);margin-bottom:1rem}
+.reading p{margin-bottom:0.95rem}
+.reading p:last-of-type{margin-bottom:0}
+.reading .tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:1.2rem}
+.reading .tag{font-size:0.74rem;letter-spacing:0.08em;color:var(--purple);background:var(--purple-light);border:1px solid rgba(123,111,232,0.3);border-radius:100px;padding:5px 12px}
+
+/* practice prompt */
+.practice{margin-top:1.6rem;background:rgba(255,213,79,0.06);border:1px solid rgba(255,213,79,0.25);border-left:3px solid var(--gold);border-radius:14px;padding:18px 22px}
+.practice .p-eyebrow{font-size:0.7rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);margin-bottom:0.45rem;display:block}
+.practice p{color:var(--cream);font-size:0.94rem;line-height:1.65;margin:0}
+.practice ul{margin:0.6rem 0 0;padding:0;list-style:none}
+.practice ul li{position:relative;padding-left:18px;color:var(--cream-70);font-size:0.92rem;line-height:1.7;margin-bottom:0.35rem}
+.practice ul li::before{content:'→';position:absolute;left:0;color:var(--gold)}
+
+/* ───── SYNTHESIS / FINALE ───── */
+.synth{background:linear-gradient(160deg,rgba(123,111,232,0.10) 0%,rgba(228,64,251,0.05) 100%);border-top:1px solid var(--cream-10);border-bottom:1px solid var(--cream-10)}
+.synth h2{font-size:clamp(1.8rem,3.2vw,2.5rem);margin-bottom:1.2rem}
+.synth h2 em{color:var(--purple)}
+.synth-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:2.4rem}
+.synth-card{background:var(--cream-06);border:1px solid var(--cream-10);border-radius:14px;padding:20px 22px;border-top:3px solid var(--purple)}
+.synth-card.coral{border-top-color:var(--coral)}
+.synth-card.cyan{border-top-color:var(--cyan)}
+.synth-card.gold{border-top-color:var(--gold)}
+.synth-card.magenta{border-top-color:var(--magenta)}
+.synth-card .name{font-family:'Lora',serif;font-style:italic;font-size:1.05rem;margin-bottom:0.5rem;color:var(--cream)}
+.synth-card p{font-size:0.9rem;color:var(--cream-70);line-height:1.65}
+
+/* tip card */
+.tip-card{margin-top:2.2rem;background:var(--cream-06);border:1px solid var(--cream-10);border-left:3px solid var(--cyan);border-radius:14px;padding:22px 26px}
+.tip-card .t-eyebrow{font-size:0.7rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--cyan);margin-bottom:0.45rem;display:block}
+.tip-card p{font-size:0.96rem;color:var(--cream-70);line-height:1.7;margin:0}
+
+/* ───── CTA / CLOSING ───── */
+.outro{text-align:center;padding:120px 0 140px;display:none}
+body.has-track .outro{display:block}
+.outro .eyebrow{margin-left:auto;margin-right:auto}
+.outro h2{font-size:clamp(1.8rem,3.4vw,2.6rem);margin-bottom:1.2rem;font-style:italic}
+.outro p{color:var(--cream-70);max-width:620px;margin:0 auto 2.4rem;font-size:1.02rem}
+.outro-buttons{display:inline-flex;gap:14px;flex-wrap:wrap;justify-content:center}
+.btn{font-family:'Questrial',sans-serif;font-size:0.92rem;padding:14px 26px;border-radius:100px;border:1px solid var(--cream-18);background:transparent;color:var(--cream);cursor:pointer;transition:background .25s,border-color .25s,transform .25s;text-decoration:none;display:inline-flex;align-items:center;gap:8px}
+.btn:hover{background:var(--cream-06);border-color:var(--cream-40);transform:translateY(-1px)}
+.btn.primary{background:var(--purple);border-color:var(--purple);color:#fff}
+.btn.primary:hover{background:#6960d9;border-color:#6960d9}
+
+/* ───── FLOATING FULLSCREEN BUTTON ───── */
+.fs-btn{position:fixed;right:24px;bottom:24px;z-index:200;width:56px;height:56px;border-radius:50%;background:var(--purple);border:1px solid rgba(255,255,255,0.18);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 14px 40px rgba(123,111,232,0.5);transition:transform .25s,background .25s}
+.fs-btn:hover{background:#6960d9;transform:translateY(-2px) scale(1.04)}
+.fs-btn svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.fs-btn .tip{position:absolute;right:calc(100% + 12px);top:50%;transform:translateY(-50%);background:var(--navy2);border:1px solid var(--cream-18);border-radius:8px;padding:7px 12px;font-size:0.78rem;color:var(--cream);white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .25s}
+.fs-btn:hover .tip{opacity:1}
+
+/* ───── DECORATIVE BURSTS ───── */
+.deco-burst{position:absolute;pointer-events:none;opacity:.18;mix-blend-mode:screen;z-index:0}
+.deco-burst img{width:100%;height:auto;display:block}
+
+/* ───── RESPONSIVE ───── */
+@media (max-width: 880px){
+  section{padding:70px 0}
+  .container{padding:0 22px}
+  .track-grid{grid-template-columns:1fr}
+  .foundation .grid{grid-template-columns:1fr;gap:36px}
+  .foundation-deco{order:-1;max-width:340px;margin:0 auto}
+  .step .interplay{grid-template-columns:1fr;gap:28px}
+  .head-progress{display:none}
+  .switch-row{flex-direction:column;align-items:flex-start;gap:10px}
+  .fs-btn{width:50px;height:50px;right:18px;bottom:18px}
+  .fs-btn .tip{display:none}
+}
+@media (max-width:520px){
+  .step .step-head{gap:14px}
+  .step-num{width:50px;height:50px;font-size:1.25rem}
+  .reading{padding:22px 22px}
+  .track-card .label{padding:22px 22px 22px}
+  .hero{padding:60px 0 40px}
+}
+
+/* fade-in for scroll reveals */
+.reveal{opacity:0;transform:translateY(18px);transition:opacity .8s ease,transform .8s ease}
+.reveal.in{opacity:1;transform:none}
+
+/* inline SVG charts inside chart-card or foundation-deco */
+.chart-card svg{width:100%;height:auto;display:block;background:#0c1118}
+.foundation-deco svg{width:100%;height:auto;display:block}
+
+/* ───── INTERACTIVE CHART TOOL ───── */
+.chart-tool{background:linear-gradient(170deg,rgba(123,111,232,0.06) 0%,rgba(79,195,247,0.04) 60%,rgba(228,64,251,0.05) 100%);border-top:1px solid var(--cream-10);border-bottom:1px solid var(--cream-10);display:none}
+body.has-track .chart-tool{display:block}
+.chart-tool .eyebrow{color:var(--cyan)}
+.chart-tool h2{font-size:clamp(1.8rem,3.2vw,2.5rem);margin-bottom:1rem}
+.chart-tool h2 em{color:var(--cyan)}
+.chart-tool .tool-lead{color:var(--cream-70);max-width:720px;margin-bottom:2.4rem;font-size:1rem}
+.ct-grid{display:grid;grid-template-columns:340px 1fr;gap:32px;align-items:start}
+.ct-form{background:var(--cream-06);border:1px solid var(--cream-10);border-radius:18px;padding:24px 24px 28px;position:sticky;top:140px}
+.ct-form h3{font-family:'Lora',serif;font-style:italic;font-size:1.15rem;margin-bottom:1rem;color:var(--cream)}
+.ct-form h3:not(:first-child){margin-top:1.6rem}
+.ct-field{margin-bottom:14px}
+.ct-field label{display:block;font-size:0.78rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--cream-70);margin-bottom:6px}
+.ct-field input[type="date"],.ct-field input[type="time"],.ct-field input[type="number"],.ct-field select{
+  width:100%;background:rgba(12,17,24,0.6);border:1px solid var(--cream-18);color:var(--cream);
+  border-radius:10px;padding:11px 13px;font-family:'Questrial',sans-serif;font-size:0.94rem;
+  outline:none;transition:border-color .25s,background .25s;color-scheme:dark;
+}
+.ct-field input:focus,.ct-field select:focus{border-color:var(--purple);background:rgba(12,17,24,0.85)}
+.ct-field small{display:block;margin-top:5px;color:var(--cream-40);font-size:0.78rem;line-height:1.4}
+.ct-field input[type="checkbox"]{accent-color:var(--purple);width:auto;margin-right:8px;vertical-align:middle}
+.ct-check{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.92rem;color:var(--cream);text-transform:none;letter-spacing:0;margin-bottom:6px}
+.ct-toggle{display:inline-flex;background:var(--cream-06);border:1px solid var(--cream-18);border-radius:100px;padding:4px;width:100%}
+.ct-toggle button{flex:1;font-family:'Questrial',sans-serif;font-size:0.85rem;color:var(--cream-70);background:transparent;border:none;padding:8px 14px;border-radius:100px;cursor:pointer;transition:background .25s,color .25s}
+.ct-toggle button.active{background:var(--purple);color:#fff}
+.ct-toggle button:not(.active):hover{color:var(--cream)}
+.ct-divider{height:1px;background:var(--cream-10);margin:18px 0}
+.ct-form .btn{width:100%;justify-content:center;margin-top:18px}
+.ct-output{display:flex;flex-direction:column;gap:24px;min-width:0}
+.ct-chart-wrap{background:#0c1118;border:1px solid var(--cream-10);border-radius:18px;padding:14px;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.ct-chart-wrap.empty{background:linear-gradient(155deg,rgba(123,111,232,0.06),rgba(12,17,24,0.6))}
+.ct-empty{text-align:center;color:var(--cream-40);max-width:280px;padding:28px}
+.ct-empty .ico{font-size:2.4rem;color:var(--purple);margin-bottom:0.8rem;display:block}
+.ct-empty p{font-size:0.95rem;line-height:1.6}
+.ct-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(12,17,24,0.85);z-index:10;color:var(--cream-70);font-size:0.9rem}
+.ct-error{background:rgba(232,96,76,0.10);border:1px solid rgba(232,96,76,0.35);border-radius:12px;padding:14px 18px;color:var(--coral);font-size:0.9rem}
+.natal-svg{width:100%;height:100%;display:block}
+.ct-summary{background:var(--cream-06);border:1px solid var(--cream-10);border-radius:14px;padding:18px 22px}
+.ct-summary .meta{display:flex;flex-wrap:wrap;gap:14px 24px;font-size:0.86rem;color:var(--cream-70)}
+.ct-summary .meta strong{color:var(--cream);font-family:'Lora',serif;font-style:italic;font-weight:600}
+.ct-tables{display:grid;grid-template-columns:1.1fr 1fr;gap:18px}
+.ct-tbl{background:var(--cream-06);border:1px solid var(--cream-10);border-radius:14px;padding:18px 20px;min-width:0}
+.ct-tbl h4{font-family:'Lora',serif;font-style:italic;font-size:1.05rem;color:var(--cream);margin-bottom:12px}
+.ct-tbl table{width:100%;border-collapse:collapse;font-size:0.88rem}
+.ct-tbl table th{text-align:left;font-weight:normal;padding:6px 4px;border-bottom:1px solid var(--cream-10);color:var(--cream-40);font-size:0.74rem;letter-spacing:0.1em;text-transform:uppercase}
+.ct-tbl table td{padding:8px 4px;border-bottom:1px solid var(--cream-06);color:var(--cream-70)}
+.ct-tbl table td.glyph{font-family:'Apple Symbols','Segoe UI Symbol','Symbola','DejaVu Sans',serif;font-size:1.05rem;width:26px;text-align:center}
+.ct-tbl table td.pos{color:var(--cream)}
+.ct-tbl table td.house{color:var(--cream-40);font-size:0.78rem;text-align:right}
+.ct-tbl ul{list-style:none;padding:0;margin:0;font-size:0.85rem;max-height:260px;overflow-y:auto}
+.ct-tbl ul li{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--cream-06);color:var(--cream-70)}
+.ct-tbl ul li .asp-ico{display:inline-flex;width:22px;height:22px;border-radius:50%;align-items:center;justify-content:center;font-size:0.8rem;flex-shrink:0}
+.ct-tbl ul li .pl{font-family:'Apple Symbols','Segoe UI Symbol','Symbola','DejaVu Sans',serif;font-size:1rem;color:var(--cream)}
+.ct-tbl ul li .orb{margin-left:auto;color:var(--cream-40);font-size:0.78rem}
+.ct-tbl ul li.empty-row{justify-content:center;color:var(--cream-40);font-style:italic}
+.asp-ico.asp-conj{background:rgba(255,213,79,0.18);color:var(--gold);border:1px solid rgba(255,213,79,0.4)}
+.asp-ico.asp-sext{background:rgba(79,195,247,0.18);color:var(--cyan);border:1px solid rgba(79,195,247,0.4)}
+.asp-ico.asp-sq{background:rgba(232,96,76,0.18);color:var(--coral);border:1px solid rgba(232,96,76,0.4)}
+.asp-ico.asp-tri{background:rgba(111,255,176,0.16);color:var(--green);border:1px solid rgba(111,255,176,0.4)}
+.asp-ico.asp-opp{background:rgba(228,64,251,0.18);color:var(--magenta);border:1px solid rgba(228,64,251,0.4)}
+.ct-prompt{margin-top:12px;background:rgba(255,213,79,0.06);border:1px solid rgba(255,213,79,0.25);border-left:3px solid var(--gold);border-radius:14px;padding:18px 22px}
+.ct-prompt .p-eyebrow{font-size:0.7rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);margin-bottom:0.45rem;display:block}
+.ct-prompt p{color:var(--cream);font-size:0.94rem;line-height:1.65;margin:0}
+@media (max-width: 980px){
+  .ct-grid{grid-template-columns:1fr}
+  .ct-form{position:static}
+  .ct-tables{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container head-row">
+    <div class="brand">
+      <span class="logo-wordmark">Nebula Academy</span>
+      <span class="logo-sep"></span>
+      <span class="logo-sub">Mini Chart Reading · Practical</span>
+    </div>
+    <div class="head-progress">
+      <span id="progressLabel">Choose a track</span>
+      <div class="head-bar"><div class="head-bar-fill" id="progressFill"></div></div>
+    </div>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <span class="hero-tag">● Practical Module · Beginner-friendly</span>
+    <h1>Read a chart in <span class="accent">four moves</span> — <br>for love, or for work.</h1>
+    <p class="hero-lead">A hands-on companion to the Foundations module. Pick the question you want to answer, click through a real natal chart, and watch the reading unfold piece by piece. By the end, you'll have a repeatable algorithm you can use on any chart that lands on your desk.</p>
+    <div class="hero-meta">
+      <span>~ 18 min interactive</span>
+      <span class="dot"></span>
+      <span>2 example charts</span>
+      <span class="dot"></span>
+      <span>Self-practice prompts</span>
+    </div>
+  </div>
+</section>
+
+<!-- TRACK CHOOSE -->
+<section class="track-choose" id="chooseTrack">
+  <div class="container">
+    <span class="eyebrow">▸ Step 0 — Pick your question</span>
+    <h2>What do you want to read for?</h2>
+    <p class="lead">The same four-step algorithm answers both — but the planets you focus on shift depending on the question.</p>
+    <div class="track-grid">
+      <button class="track-card" data-track="rel" aria-label="Choose Relationships track">
+        <span class="pill"><span class="pill-text">Choose</span></span>
+        <img src="images/photo-couple-sunset.jpg" alt="Couple silhouette at sunset">
+        <div class="label">
+          <span class="kicker">Track A</span>
+          <h3>Relationships</h3>
+          <p>How you love, what you need, and the patterns that keep showing up. Sun · Moon · Venus · Ascendant.</p>
+        </div>
+      </button>
+      <button class="track-card" data-track="car" aria-label="Choose Career track">
+        <span class="pill"><span class="pill-text">Choose</span></span>
+        <img src="images/photo-laptop-work.jpg" alt="Laptop, coffee and notebook on a desk">
+        <div class="label">
+          <span class="kicker">Track B</span>
+          <h3>Career</h3>
+          <p>Where you're built to shine and the environment that lets you. Sun · Moon · Midheaven · Ascendant.</p>
+        </div>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- STICKY TRACK SWITCH -->
+<div class="track-switch" id="trackSwitch">
+  <div class="container switch-row">
+    <span class="switch-label" id="switchLabel">Track: Relationships</span>
+    <div class="switch-buttons">
+      <button class="switch-btn active" data-go="rel">Relationships</button>
+      <button class="switch-btn" data-go="car">Career</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- TRACK A — RELATIONSHIPS -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="track-content" id="track-rel" data-name="Relationships">
+
+  <!-- FOUNDATION -->
+  <section class="foundation" id="rel-foundation">
+    <div class="container grid">
+      <div>
+        <span class="eyebrow">▸ Foundation — Why this track exists</span>
+        <h2>Astrology for <em>relationships</em> isn't fortune-telling. It's pattern-reading.</h2>
+        <p>People rarely arrive with the question, "is this person my soulmate?" More often they ask: <em>what kind of partner do I attract? How do I express love? Why do these patterns repeat?</em> The chart doesn't predict timing or outcomes — it reveals the emotional blueprint underneath.</p>
+        <p>For a mini reading, four placements do almost all the work. We're going to read them in sequence, then synthesize.</p>
+        <div class="tools">
+          <div class="tool"><div class="t-name">Astro.com</div><div class="t-desc">Free, accurate, no signup needed.</div></div>
+          <div class="tool"><div class="t-name">Astro-Seek</div><div class="t-desc">Cleaner UI, mobile-friendly.</div></div>
+          <div class="tool"><div class="t-name">Co-Star / TimePassages</div><div class="t-desc">If a phone app feels easier.</div></div>
+        </div>
+      </div>
+      <div class="foundation-deco">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 720" width="100%" height="100%" role="img" aria-label="Anatomy of a chart">
+  <style>
+    text { font-family: "Lora", "Apple Symbols", "Segoe UI Symbol", "Symbola", "Noto Sans Symbols", "DejaVu Sans", serif; }
+    .glyph { font-family: "Apple Symbols", "Segoe UI Symbol", "Symbola", "Noto Sans Symbols", "DejaVu Sans", "Lora", serif; }
+  </style>
+  <defs>
+        <radialGradient id="bgGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#141d2b" stop-opacity="1"/>
+            <stop offset="100%" stop-color="#0c1118" stop-opacity="1"/>
+        </radialGradient>
+        <filter id="glow"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    </defs>
+  <circle cx="360.0" cy="360.0" r="340" fill="url(#bgGrad)" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <path d="M 28.00 360.00 A 332 332 0 0 0 72.48 526.00 L 103.66 508.00 A 296 296 0 0 1 64.00 360.00 Z" fill="#E8604C" stroke="none" opacity="0.18"/>
+  <text x="56.7" y="441.3" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♈</text>
+  <path d="M 72.48 526.00 A 332 332 0 0 0 194.00 647.52 L 212.00 616.34 A 296 296 0 0 1 103.66 508.00 Z" fill="#6FFFB0" stroke="none" opacity="0.18"/>
+  <text x="138.0" y="582.0" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♉</text>
+  <path d="M 194.00 647.52 A 332 332 0 0 0 360.00 692.00 L 360.00 656.00 A 296 296 0 0 1 212.00 616.34 Z" fill="#4FC3F7" stroke="none" opacity="0.18"/>
+  <text x="278.7" y="663.3" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♊</text>
+  <path d="M 360.00 692.00 A 332 332 0 0 0 526.00 647.52 L 508.00 616.34 A 296 296 0 0 1 360.00 656.00 Z" fill="#E040FB" stroke="none" opacity="0.18"/>
+  <text x="441.3" y="663.3" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♋</text>
+  <path d="M 526.00 647.52 A 332 332 0 0 0 647.52 526.00 L 616.34 508.00 A 296 296 0 0 1 508.00 616.34 Z" fill="#E8604C" stroke="none" opacity="0.18"/>
+  <text x="582.0" y="582.0" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♌</text>
+  <path d="M 647.52 526.00 A 332 332 0 0 0 692.00 360.00 L 656.00 360.00 A 296 296 0 0 1 616.34 508.00 Z" fill="#6FFFB0" stroke="none" opacity="0.18"/>
+  <text x="663.3" y="441.3" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♍</text>
+  <path d="M 692.00 360.00 A 332 332 0 0 0 647.52 194.00 L 616.34 212.00 A 296 296 0 0 1 656.00 360.00 Z" fill="#4FC3F7" stroke="none" opacity="0.18"/>
+  <text x="663.3" y="278.7" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♎</text>
+  <path d="M 647.52 194.00 A 332 332 0 0 0 526.00 72.48 L 508.00 103.66 A 296 296 0 0 1 616.34 212.00 Z" fill="#E040FB" stroke="none" opacity="0.18"/>
+  <text x="582.0" y="138.0" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♏</text>
+  <path d="M 526.00 72.48 A 332 332 0 0 0 360.00 28.00 L 360.00 64.00 A 296 296 0 0 1 508.00 103.66 Z" fill="#E8604C" stroke="none" opacity="0.18"/>
+  <text x="441.3" y="56.7" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♐</text>
+  <path d="M 360.00 28.00 A 332 332 0 0 0 194.00 72.48 L 212.00 103.66 A 296 296 0 0 1 360.00 64.00 Z" fill="#6FFFB0" stroke="none" opacity="0.18"/>
+  <text x="278.7" y="56.7" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♑</text>
+  <path d="M 194.00 72.48 A 332 332 0 0 0 72.48 194.00 L 103.66 212.00 A 296 296 0 0 1 212.00 103.66 Z" fill="#4FC3F7" stroke="none" opacity="0.18"/>
+  <text x="138.0" y="138.0" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♒</text>
+  <path d="M 72.48 194.00 A 332 332 0 0 0 28.00 360.00 L 64.00 360.00 A 296 296 0 0 1 103.66 212.00 Z" fill="#E040FB" stroke="none" opacity="0.18"/>
+  <text x="56.7" y="278.7" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♓</text>
+  <circle cx="360.0" cy="360.0" r="332" fill="none" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <circle cx="360.0" cy="360.0" r="296" fill="none" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <circle cx="360.0" cy="360.0" r="252" fill="none" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <circle cx="360.0" cy="360.0" r="92" fill="#0c1118" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="108.0" y1="360.0" x2="28.0" y2="360.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="141.8" y1="486.0" x2="72.5" y2="526.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="234.0" y1="578.2" x2="194.0" y2="647.5" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="360.0" y1="612.0" x2="360.0" y2="692.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="486.0" y1="578.2" x2="526.0" y2="647.5" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="578.2" y1="486.0" x2="647.5" y2="526.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="612.0" y1="360.0" x2="692.0" y2="360.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="578.2" y1="234.0" x2="647.5" y2="194.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="486.0" y1="141.8" x2="526.0" y2="72.5" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="360.0" y1="108.0" x2="360.0" y2="28.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="234.0" y1="141.8" x2="194.0" y2="72.5" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="141.8" y1="234.0" x2="72.5" y2="194.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <text x="166.8" y="411.8" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">1</text>
+  <text x="218.6" y="501.4" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">2</text>
+  <text x="308.2" y="553.2" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">3</text>
+  <text x="411.8" y="553.2" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">4</text>
+  <text x="501.4" y="501.4" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">5</text>
+  <text x="553.2" y="411.8" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">6</text>
+  <text x="553.2" y="308.2" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">7</text>
+  <text x="501.4" y="218.6" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">8</text>
+  <text x="411.8" y="166.8" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">9</text>
+  <text x="308.2" y="166.8" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">10</text>
+  <text x="218.6" y="218.6" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">11</text>
+  <text x="166.8" y="308.2" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">12</text>
+  <line x1="268.0" y1="360.0" x2="108.0" y2="360.0" stroke="#f0ebe0" stroke-width="1.6" opacity="0.9"/>
+  <line x1="280.3" y1="406.0" x2="141.8" y2="486.0" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <line x1="314.0" y1="439.7" x2="234.0" y2="578.2" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <line x1="360.0" y1="452.0" x2="360.0" y2="612.0" stroke="#f0ebe0" stroke-width="1.6" opacity="0.9"/>
+  <line x1="406.0" y1="439.7" x2="486.0" y2="578.2" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <line x1="439.7" y1="406.0" x2="578.2" y2="486.0" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <line x1="452.0" y1="360.0" x2="612.0" y2="360.0" stroke="#f0ebe0" stroke-width="1.6" opacity="0.9"/>
+  <line x1="439.7" y1="314.0" x2="578.2" y2="234.0" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <line x1="406.0" y1="280.3" x2="486.0" y2="141.8" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <line x1="360.0" y1="268.0" x2="360.0" y2="108.0" stroke="#f0ebe0" stroke-width="1.6" opacity="0.9"/>
+  <line x1="314.0" y1="280.3" x2="234.0" y2="141.8" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <line x1="280.3" y1="314.0" x2="141.8" y2="234.0" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <text x="2.0" y="360.0" fill="#7B6FE8" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif" letter-spacing="2">ASC</text>
+  <text x="360.0" y="718.0" fill="#7B6FE8" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif" letter-spacing="2">IC</text>
+  <text x="718.0" y="360.0" fill="#7B6FE8" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif" letter-spacing="2">DC</text>
+  <text x="360.0" y="2.0" fill="#7B6FE8" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif" letter-spacing="2">MC</text>
+  <text x="360.0" y="354.0" fill="#f0ebe0" font-size="16" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" font-style="italic">Anatomy of a chart</text>
+  <text x="360.0" y="378.0" fill="rgba(240,235,224,0.70)" font-size="11" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif" letter-spacing="1.5">ASC · IC · DC · MC + 12 houses</text>
+</svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 1 · SUN & MOON -->
+  <section class="step" id="rel-step1">
+    <div class="container">
+      <div class="step-head">
+        <div class="step-num">1</div>
+        <div class="text">
+          <span class="eyebrow">▸ Step 1 of 4</span>
+          <h2>Sun &amp; Moon — your <em>emotional baseline</em></h2>
+          <p class="sub">The Sun is conscious direction — how someone <em>acts</em> and expresses will. The Moon is emotional instinct — what they <em>need</em> to feel safe. Read together, they tell you the basic push-and-pull between outer and inner worlds. Do they support each other, or pull in different directions?</p>
+        </div>
+      </div>
+
+      <div class="interplay">
+        <button class="chart-card" data-reveal="rel-1" aria-label="Click to reveal Sun and Moon reading">
+          <span class="focus-tag">Sun · Moon</span>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 720" width="100%" height="100%" role="img" aria-label="Aries ☉ × Cancer ☾">
+  <style>
+    text { font-family: "Lora", "Apple Symbols", "Segoe UI Symbol", "Symbola", "Noto Sans Symbols", "DejaVu Sans", serif; }
+    .glyph { font-family: "Apple Symbols", "Segoe UI Symbol", "Symbola", "Noto Sans Symbols", "DejaVu Sans", "Lora", serif; }
+  </style>
+  <defs>
+        <radialGradient id="bgGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#141d2b" stop-opacity="1"/>
+            <stop offset="100%" stop-color="#0c1118" stop-opacity="1"/>
+        </radialGradient>
+        <filter id="glow"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    </defs>
+  <circle cx="360.0" cy="360.0" r="340" fill="url(#bgGrad)" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <path d="M 526.00 72.48 A 332 332 0 0 0 360.00 28.00 L 360.00 64.00 A 296 296 0 0 1 508.00 103.66 Z" fill="#E8604C" stroke="none" opacity="0.18"/>
+  <text x="441.3" y="56.7" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♈</text>
+  <path d="M 360.00 28.00 A 332 332 0 0 0 194.00 72.48 L 212.00 103.66 A 296 296 0 0 1 360.00 64.00 Z" fill="#6FFFB0" stroke="none" opacity="0.18"/>
+  <text x="278.7" y="56.7" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♉</text>
+  <path d="M 194.00 72.48 A 332 332 0 0 0 72.48 194.00 L 103.66 212.00 A 296 296 0 0 1 212.00 103.66 Z" fill="#4FC3F7" stroke="none" opacity="0.18"/>
+  <text x="138.0" y="138.0" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♊</text>
+  <path d="M 72.48 194.00 A 332 332 0 0 0 28.00 360.00 L 64.00 360.00 A 296 296 0 0 1 103.66 212.00 Z" fill="#E040FB" stroke="none" opacity="0.18"/>
+  <text x="56.7" y="278.7" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♋</text>
+  <path d="M 28.00 360.00 A 332 332 0 0 0 72.48 526.00 L 103.66 508.00 A 296 296 0 0 1 64.00 360.00 Z" fill="#E8604C" stroke="none" opacity="0.18"/>
+  <text x="56.7" y="441.3" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♌</text>
+  <path d="M 72.48 526.00 A 332 332 0 0 0 194.00 647.52 L 212.00 616.34 A 296 296 0 0 1 103.66 508.00 Z" fill="#6FFFB0" stroke="none" opacity="0.18"/>
+  <text x="138.0" y="582.0" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♍</text>
+  <path d="M 194.00 647.52 A 332 332 0 0 0 360.00 692.00 L 360.00 656.00 A 296 296 0 0 1 212.00 616.34 Z" fill="#4FC3F7" stroke="none" opacity="0.18"/>
+  <text x="278.7" y="663.3" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♎</text>
+  <path d="M 360.00 692.00 A 332 332 0 0 0 526.00 647.52 L 508.00 616.34 A 296 296 0 0 1 360.00 656.00 Z" fill="#E040FB" stroke="none" opacity="0.18"/>
+  <text x="441.3" y="663.3" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♏</text>
+  <path d="M 526.00 647.52 A 332 332 0 0 0 647.52 526.00 L 616.34 508.00 A 296 296 0 0 1 508.00 616.34 Z" fill="#E8604C" stroke="none" opacity="0.18"/>
+  <text x="582.0" y="582.0" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♐</text>
+  <path d="M 647.52 526.00 A 332 332 0 0 0 692.00 360.00 L 656.00 360.00 A 296 296 0 0 1 616.34 508.00 Z" fill="#6FFFB0" stroke="none" opacity="0.18"/>
+  <text x="663.3" y="441.3" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♑</text>
+  <path d="M 692.00 360.00 A 332 332 0 0 0 647.52 194.00 L 616.34 212.00 A 296 296 0 0 1 656.00 360.00 Z" fill="#4FC3F7" stroke="none" opacity="0.18"/>
+  <text x="663.3" y="278.7" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♒</text>
+  <path d="M 647.52 194.00 A 332 332 0 0 0 526.00 72.48 L 508.00 103.66 A 296 296 0 0 1 616.34 212.00 Z" fill="#E040FB" stroke="none" opacity="0.18"/>
+  <text x="582.0" y="138.0" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♓</text>
+  <circle cx="360.0" cy="360.0" r="332" fill="none" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <circle cx="360.0" cy="360.0" r="296" fill="none" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <circle cx="360.0" cy="360.0" r="252" fill="none" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <circle cx="360.0" cy="360.0" r="92" fill="#0c1118" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="486.0" y1="141.8" x2="526.0" y2="72.5" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="360.0" y1="108.0" x2="360.0" y2="28.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="234.0" y1="141.8" x2="194.0" y2="72.5" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="141.8" y1="234.0" x2="72.5" y2="194.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="108.0" y1="360.0" x2="28.0" y2="360.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="141.8" y1="486.0" x2="72.5" y2="526.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="234.0" y1="578.2" x2="194.0" y2="647.5" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="360.0" y1="612.0" x2="360.0" y2="692.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="486.0" y1="578.2" x2="526.0" y2="647.5" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="578.2" y1="486.0" x2="647.5" y2="526.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="612.0" y1="360.0" x2="692.0" y2="360.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="578.2" y1="234.0" x2="647.5" y2="194.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <text x="166.8" y="411.8" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">1</text>
+  <text x="218.6" y="501.4" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">2</text>
+  <text x="308.2" y="553.2" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">3</text>
+  <text x="411.8" y="553.2" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">4</text>
+  <text x="501.4" y="501.4" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">5</text>
+  <text x="553.2" y="411.8" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">6</text>
+  <text x="553.2" y="308.2" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">7</text>
+  <text x="501.4" y="218.6" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">8</text>
+  <text x="411.8" y="166.8" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">9</text>
+  <text x="308.2" y="166.8" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">10</text>
+  <text x="218.6" y="218.6" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">11</text>
+  <text x="166.8" y="308.2" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">12</text>
+  <line x1="268.0" y1="360.0" x2="108.0" y2="360.0" stroke="#f0ebe0" stroke-width="1.6" opacity="0.9"/>
+  <line x1="280.3" y1="406.0" x2="141.8" y2="486.0" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <line x1="314.0" y1="439.7" x2="234.0" y2="578.2" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <line x1="360.0" y1="452.0" x2="360.0" y2="612.0" stroke="#f0ebe0" stroke-width="1.6" opacity="0.9"/>
+  <line x1="406.0" y1="439.7" x2="486.0" y2="578.2" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <line x1="439.7" y1="406.0" x2="578.2" y2="486.0" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <line x1="452.0" y1="360.0" x2="612.0" y2="360.0" stroke="#f0ebe0" stroke-width="1.6" opacity="0.9"/>
+  <line x1="439.7" y1="314.0" x2="578.2" y2="234.0" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <line x1="406.0" y1="280.3" x2="486.0" y2="141.8" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <line x1="360.0" y1="268.0" x2="360.0" y2="108.0" stroke="#f0ebe0" stroke-width="1.6" opacity="0.9"/>
+  <line x1="314.0" y1="280.3" x2="234.0" y2="141.8" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <line x1="280.3" y1="314.0" x2="141.8" y2="234.0" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <text x="2.0" y="360.0" fill="#7B6FE8" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif" letter-spacing="2">ASC</text>
+  <text x="360.0" y="718.0" fill="#7B6FE8" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif" letter-spacing="2">IC</text>
+  <text x="718.0" y="360.0" fill="#7B6FE8" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif" letter-spacing="2">DC</text>
+  <text x="360.0" y="2.0" fill="#7B6FE8" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif" letter-spacing="2">MC</text>
+  <circle cx="421.8" cy="169.8" r="22" fill="#E8604C" opacity="0.32" filter="url(#glow)"/>
+  <circle cx="421.8" cy="169.8" r="20" fill="none" stroke="#E8604C" stroke-width="2"/>
+  <text x="421.8" y="169.8" fill="#f0ebe0" font-size="24" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif">☉</text>
+  <text x="415.0" y="190.7" fill="rgba(240,235,224,0.40)" font-size="10" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">12°</text>
+  <circle cx="164.4" cy="318.4" r="22" fill="#4FC3F7" opacity="0.32" filter="url(#glow)"/>
+  <circle cx="164.4" cy="318.4" r="20" fill="none" stroke="#4FC3F7" stroke-width="2"/>
+  <text x="164.4" y="318.4" fill="#f0ebe0" font-size="24" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif">☾</text>
+  <text x="185.9" y="323.0" fill="rgba(240,235,224,0.40)" font-size="10" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">18°</text>
+  <text x="525.8" y="248.2" fill="#f0ebe0" font-size="24" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif">♀</text>
+  <text x="507.6" y="260.5" fill="rgba(240,235,224,0.40)" font-size="10" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">04°</text>
+  <text x="202.4" y="236.9" fill="#f0ebe0" font-size="24" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif">♂</text>
+  <text x="219.7" y="250.4" fill="rgba(240,235,224,0.40)" font-size="10" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">22°</text>
+  <text x="367.0" y="160.1" fill="#f0ebe0" font-size="24" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif">☿</text>
+  <text x="366.2" y="182.1" fill="rgba(240,235,224,0.40)" font-size="10" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">28°</text>
+  <text x="360.0" y="354.0" fill="#f0ebe0" font-size="16" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" font-style="italic">Aries ☉ × Cancer ☾</text>
+  <text x="360.0" y="378.0" fill="rgba(240,235,224,0.70)" font-size="11" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif" letter-spacing="1.5">Independence ↔ closeness</text>
+</svg>
+          <span class="hint">
+            <span>Click the chart for the reading</span>
+            <span class="ico">+</span>
+          </span>
+        </button>
+
+        <div class="reading">
+          <div class="placeholder" id="ph-rel-1">
+            <span class="ico">✶</span><br>
+            Click the image on the left to reveal the reading.
+          </div>
+          <div class="reading-content" id="rd-rel-1">
+            <h4>Example — Aries Sun × Cancer Moon</h4>
+            <p>This combination mixes <strong>fierce independence</strong> with <strong>deep protectiveness</strong>. The Aries Sun wants to lead, initiate, and stay sovereign. The Cancer Moon needs closeness, emotional safety, and a sense of home. Both are fiercely loyal — but they pull in different directions.</p>
+            <p>In relationships, this person can love hard and withdraw fast. They crave intimacy but feel suffocated when controlled. Recognising the tension is the work: it's not a flaw to fix, it's a rhythm to balance — initiative <em>plus</em> empathy, not initiative <em>versus</em> empathy.</p>
+            <p><strong>Quick rule:</strong> if Sun and Moon harmonize (same element or compatible), expect emotional steadiness. If they clash, expect lifelong learning around self-expression and sensitivity — and partners who keep mirroring that tension back.</p>
+            <div class="tags">
+              <span class="tag">Aries Sun</span>
+              <span class="tag">Cancer Moon</span>
+              <span class="tag">Independence + closeness</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="practice">
+        <span class="p-eyebrow">★ Try it on your own chart</span>
+        <p>Pull up your chart and find the Sun and Moon glyphs (☉ and ☾). Note their signs.</p>
+        <ul>
+          <li>Are they in compatible elements (Fire/Air or Earth/Water), or do they clash?</li>
+          <li>Which one feels more dominant in how you actually behave day-to-day?</li>
+          <li>Write one sentence: "I want to ___, but I need to feel ___."</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 2 · VENUS -->
+  <section class="step" id="rel-step2">
+    <div class="container">
+      <div class="step-head">
+        <div class="step-num n2">2</div>
+        <div class="text">
+          <span class="eyebrow">▸ Step 2 of 4</span>
+          <h2>Venus — your <em>love language</em></h2>
+          <p class="sub">Venus shows what you find beautiful and how you give affection. Note its sign and house. Air-sign Venus loves through words; Earth-sign Venus loves through actions and consistency. Aspect Venus to Mars for chemistry, to Saturn for commitment themes.</p>
+        </div>
+      </div>
+
+      <div class="interplay">
+        <button class="chart-card" data-reveal="rel-2" aria-label="Click to reveal Venus reading">
+          <span class="focus-tag">Venus close-up</span>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 720" width="100%" height="100%" role="img" aria-label="Venus in Taurus">
+  <style>
+    text { font-family: "Lora", "Apple Symbols", "Segoe UI Symbol", "Symbola", "Noto Sans Symbols", "DejaVu Sans", serif; }
+    .glyph { font-family: "Apple Symbols", "Segoe UI Symbol", "Symbola", "Noto Sans Symbols", "DejaVu Sans", "Lora", serif; }
+  </style>
+  <defs>
+        <radialGradient id="bgGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#141d2b" stop-opacity="1"/>
+            <stop offset="100%" stop-color="#0c1118" stop-opacity="1"/>
+        </radialGradient>
+        <filter id="glow"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    </defs>
+  <circle cx="360.0" cy="360.0" r="340" fill="url(#bgGrad)" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <path d="M 647.52 194.00 A 332 332 0 0 0 526.00 72.48 L 508.00 103.66 A 296 296 0 0 1 616.34 212.00 Z" fill="#E8604C" stroke="none" opacity="0.18"/>
+  <text x="582.0" y="138.0" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♈</text>
+  <path d="M 526.00 72.48 A 332 332 0 0 0 360.00 28.00 L 360.00 64.00 A 296 296 0 0 1 508.00 103.66 Z" fill="#6FFFB0" stroke="none" opacity="0.18"/>
+  <text x="441.3" y="56.7" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♉</text>
+  <path d="M 360.00 28.00 A 332 332 0 0 0 194.00 72.48 L 212.00 103.66 A 296 296 0 0 1 360.00 64.00 Z" fill="#4FC3F7" stroke="none" opacity="0.18"/>
+  <text x="278.7" y="56.7" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♊</text>
+  <path d="M 194.00 72.48 A 332 332 0 0 0 72.48 194.00 L 103.66 212.00 A 296 296 0 0 1 212.00 103.66 Z" fill="#E040FB" stroke="none" opacity="0.18"/>
+  <text x="138.0" y="138.0" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♋</text>
+  <path d="M 72.48 194.00 A 332 332 0 0 0 28.00 360.00 L 64.00 360.00 A 296 296 0 0 1 103.66 212.00 Z" fill="#E8604C" stroke="none" opacity="0.18"/>
+  <text x="56.7" y="278.7" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♌</text>
+  <path d="M 28.00 360.00 A 332 332 0 0 0 72.48 526.00 L 103.66 508.00 A 296 296 0 0 1 64.00 360.00 Z" fill="#6FFFB0" stroke="none" opacity="0.18"/>
+  <text x="56.7" y="441.3" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♍</text>
+  <path d="M 72.48 526.00 A 332 332 0 0 0 194.00 647.52 L 212.00 616.34 A 296 296 0 0 1 103.66 508.00 Z" fill="#4FC3F7" stroke="none" opacity="0.18"/>
+  <text x="138.0" y="582.0" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♎</text>
+  <path d="M 194.00 647.52 A 332 332 0 0 0 360.00 692.00 L 360.00 656.00 A 296 296 0 0 1 212.00 616.34 Z" fill="#E040FB" stroke="none" opacity="0.18"/>
+  <text x="278.7" y="663.3" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♏</text>
+  <path d="M 360.00 692.00 A 332 332 0 0 0 526.00 647.52 L 508.00 616.34 A 296 296 0 0 1 360.00 656.00 Z" fill="#E8604C" stroke="none" opacity="0.18"/>
+  <text x="441.3" y="663.3" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♐</text>
+  <path d="M 526.00 647.52 A 332 332 0 0 0 647.52 526.00 L 616.34 508.00 A 296 296 0 0 1 508.00 616.34 Z" fill="#6FFFB0" stroke="none" opacity="0.18"/>
+  <text x="582.0" y="582.0" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♑</text>
+  <path d="M 647.52 526.00 A 332 332 0 0 0 692.00 360.00 L 656.00 360.00 A 296 296 0 0 1 616.34 508.00 Z" fill="#4FC3F7" stroke="none" opacity="0.18"/>
+  <text x="663.3" y="441.3" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♒</text>
+  <path d="M 692.00 360.00 A 332 332 0 0 0 647.52 194.00 L 616.34 212.00 A 296 296 0 0 1 656.00 360.00 Z" fill="#E040FB" stroke="none" opacity="0.18"/>
+  <text x="663.3" y="278.7" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♓</text>
+  <circle cx="360.0" cy="360.0" r="332" fill="none" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <circle cx="360.0" cy="360.0" r="296" fill="none" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <circle cx="360.0" cy="360.0" r="252" fill="none" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <circle cx="360.0" cy="360.0" r="92" fill="#0c1118" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="578.2" y1="234.0" x2="647.5" y2="194.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="486.0" y1="141.8" x2="526.0" y2="72.5" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="360.0" y1="108.0" x2="360.0" y2="28.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="234.0" y1="141.8" x2="194.0" y2="72.5" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="141.8" y1="234.0" x2="72.5" y2="194.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="108.0" y1="360.0" x2="28.0" y2="360.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="141.8" y1="486.0" x2="72.5" y2="526.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="234.0" y1="578.2" x2="194.0" y2="647.5" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="360.0" y1="612.0" x2="360.0" y2="692.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="486.0" y1="578.2" x2="526.0" y2="647.5" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="578.2" y1="486.0" x2="647.5" y2="526.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="612.0" y1="360.0" x2="692.0" y2="360.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <text x="166.8" y="411.8" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">1</text>
+  <text x="218.6" y="501.4" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">2</text>
+  <text x="308.2" y="553.2" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">3</text>
+  <text x="411.8" y="553.2" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">4</text>
+  <text x="501.4" y="501.4" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">5</text>
+  <text x="553.2" y="411.8" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">6</text>
+  <text x="553.2" y="308.2" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">7</text>
+  <text x="501.4" y="218.6" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">8</text>
+  <text x="411.8" y="166.8" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">9</text>
+  <text x="308.2" y="166.8" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">10</text>
+  <text x="218.6" y="218.6" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">11</text>
+  <text x="166.8" y="308.2" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">12</text>
+  <line x1="268.0" y1="360.0" x2="108.0" y2="360.0" stroke="#f0ebe0" stroke-width="1.6" opacity="0.9"/>
+  <line x1="280.3" y1="406.0" x2="141.8" y2="486.0" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <line x1="314.0" y1="439.7" x2="234.0" y2="578.2" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <line x1="360.0" y1="452.0" x2="360.0" y2="612.0" stroke="#f0ebe0" stroke-width="1.6" opacity="0.9"/>
+  <line x1="406.0" y1="439.7" x2="486.0" y2="578.2" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <line x1="439.7" y1="406.0" x2="578.2" y2="486.0" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <line x1="452.0" y1="360.0" x2="612.0" y2="360.0" stroke="#f0ebe0" stroke-width="1.6" opacity="0.9"/>
+  <line x1="439.7" y1="314.0" x2="578.2" y2="234.0" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <line x1="406.0" y1="280.3" x2="486.0" y2="141.8" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <line x1="360.0" y1="268.0" x2="360.0" y2="108.0" stroke="#f0ebe0" stroke-width="1.6" opacity="0.9"/>
+  <line x1="314.0" y1="280.3" x2="234.0" y2="141.8" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <line x1="280.3" y1="314.0" x2="141.8" y2="234.0" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <text x="2.0" y="360.0" fill="#7B6FE8" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif" letter-spacing="2">ASC</text>
+  <text x="360.0" y="718.0" fill="#7B6FE8" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif" letter-spacing="2">IC</text>
+  <text x="718.0" y="360.0" fill="#7B6FE8" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif" letter-spacing="2">DC</text>
+  <text x="360.0" y="2.0" fill="#7B6FE8" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif" letter-spacing="2">MC</text>
+  <text x="434.9" y="174.6" fill="#f0ebe0" font-size="24" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif">☉</text>
+  <text x="426.7" y="195.0" fill="rgba(240,235,224,0.40)" font-size="10" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">08°</text>
+  <text x="554.1" y="311.6" fill="#f0ebe0" font-size="24" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif">☾</text>
+  <text x="532.7" y="316.9" fill="rgba(240,235,224,0.40)" font-size="10" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">14°</text>
+  <circle cx="403.5" cy="197.7" r="22" fill="#6FFFB0" opacity="0.32" filter="url(#glow)"/>
+  <circle cx="403.5" cy="197.7" r="20" fill="none" stroke="#6FFFB0" stroke-width="2"/>
+  <text x="403.5" y="197.7" fill="#f0ebe0" font-size="24" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif">♀</text>
+  <text x="397.8" y="219.0" fill="rgba(240,235,224,0.40)" font-size="10" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">15°</text>
+  <text x="527.7" y="251.1" fill="#f0ebe0" font-size="24" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif">♂</text>
+  <text x="509.3" y="263.1" fill="rgba(240,235,224,0.40)" font-size="10" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">03°</text>
+  <text x="278.7" y="177.3" fill="#f0ebe0" font-size="24" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif">☿</text>
+  <text x="287.6" y="197.4" fill="rgba(240,235,224,0.40)" font-size="10" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">24°</text>
+  <text x="491.2" y="510.9" fill="#f0ebe0" font-size="24" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif">♃</text>
+  <text x="476.8" y="494.3" fill="rgba(240,235,224,0.40)" font-size="10" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">11°</text>
+  <text x="360.0" y="354.0" fill="#f0ebe0" font-size="16" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" font-style="italic">Venus in Taurus</text>
+  <text x="360.0" y="378.0" fill="rgba(240,235,224,0.70)" font-size="11" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif" letter-spacing="1.5">Loyalty · comfort · presence</text>
+</svg>
+          <span class="hint">
+            <span>Click the chart for the reading</span>
+            <span class="ico">+</span>
+          </span>
+        </button>
+
+        <div class="reading">
+          <div class="placeholder" id="ph-rel-2">
+            <span class="ico">✶</span><br>
+            Click the image on the left to reveal the reading.
+          </div>
+          <div class="reading-content" id="rd-rel-2">
+            <h4>Example — Venus in Taurus vs. Venus in Gemini</h4>
+            <p><strong>Venus in Taurus</strong> needs physical and emotional stability. Loyalty, shared comfort, predictability. Loves through touch, food, returning to the same restaurant. The shadow: resistance to change. They may stay in a relationship for security rather than growth. The lesson is that <em>real</em> comfort comes from trust, not control.</p>
+            <p><strong>Venus in Gemini</strong> values communication, curiosity, and mental connection. They fall in love through conversation and need ongoing intellectual stimulation to stay engaged. The shadow: restlessness, surface-level flirting. The lesson is that depth comes from staying with one mind long enough to actually finish a thought together.</p>
+            <p><strong>How to use this:</strong> match Venus's element to the way affection is expressed. If you're reading for someone whose Venus element doesn't match their partner's, name it — that's where most "they don't show love right" complaints come from.</p>
+            <div class="tags">
+              <span class="tag">Venus = comfort filter</span>
+              <span class="tag">Sign + house = how + where</span>
+              <span class="tag">Aspect to Mars / Saturn</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="practice">
+        <span class="p-eyebrow">★ Try it on your own chart</span>
+        <p>Find Venus (♀) on your wheel. Note its sign and the house number it sits in.</p>
+        <ul>
+          <li>Sign tells you <em>how</em> you love — translate it into a sentence.</li>
+          <li>House tells you <em>where</em> love shows up most (1H = identity, 7H = partnership, 10H = public life, etc.).</li>
+          <li>Look at lines drawn from Venus — those aspects colour the picture further.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 3 · ASCENDANT (Relationships) -->
+  <section class="step" id="rel-step3">
+    <div class="container">
+      <div class="step-head">
+        <div class="step-num n3">3</div>
+        <div class="text">
+          <span class="eyebrow">▸ Step 3 of 4</span>
+          <h2>Ascendant — the <em>style</em> others meet first</h2>
+          <p class="sub">The Ascendant (Rising sign) describes how you approach love and handle conflict. Libra Rising seeks agreement; Aries Rising dives in fearlessly; Capricorn Rising prefers boundaries and gradual trust. The ruling planet of the Ascendant shows how those instincts get projected outward.</p>
+        </div>
+      </div>
+
+      <div class="interplay">
+        <button class="chart-card" data-reveal="rel-3" aria-label="Click to reveal Ascendant reading">
+          <span class="focus-tag">Ascendant</span>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 720" width="100%" height="100%" role="img" aria-label="Libra Rising">
+  <style>
+    text { font-family: "Lora", "Apple Symbols", "Segoe UI Symbol", "Symbola", "Noto Sans Symbols", "DejaVu Sans", serif; }
+    .glyph { font-family: "Apple Symbols", "Segoe UI Symbol", "Symbola", "Noto Sans Symbols", "DejaVu Sans", "Lora", serif; }
+  </style>
+  <defs>
+        <radialGradient id="bgGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#141d2b" stop-opacity="1"/>
+            <stop offset="100%" stop-color="#0c1118" stop-opacity="1"/>
+        </radialGradient>
+        <filter id="glow"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    </defs>
+  <circle cx="360.0" cy="360.0" r="340" fill="url(#bgGrad)" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <path d="M 692.00 360.00 A 332 332 0 0 0 647.52 194.00 L 616.34 212.00 A 296 296 0 0 1 656.00 360.00 Z" fill="#E8604C" stroke="none" opacity="0.18"/>
+  <text x="663.3" y="278.7" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♈</text>
+  <path d="M 647.52 194.00 A 332 332 0 0 0 526.00 72.48 L 508.00 103.66 A 296 296 0 0 1 616.34 212.00 Z" fill="#6FFFB0" stroke="none" opacity="0.18"/>
+  <text x="582.0" y="138.0" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♉</text>
+  <path d="M 526.00 72.48 A 332 332 0 0 0 360.00 28.00 L 360.00 64.00 A 296 296 0 0 1 508.00 103.66 Z" fill="#4FC3F7" stroke="none" opacity="0.18"/>
+  <text x="441.3" y="56.7" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♊</text>
+  <path d="M 360.00 28.00 A 332 332 0 0 0 194.00 72.48 L 212.00 103.66 A 296 296 0 0 1 360.00 64.00 Z" fill="#E040FB" stroke="none" opacity="0.18"/>
+  <text x="278.7" y="56.7" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♋</text>
+  <path d="M 194.00 72.48 A 332 332 0 0 0 72.48 194.00 L 103.66 212.00 A 296 296 0 0 1 212.00 103.66 Z" fill="#E8604C" stroke="none" opacity="0.18"/>
+  <text x="138.0" y="138.0" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♌</text>
+  <path d="M 72.48 194.00 A 332 332 0 0 0 28.00 360.00 L 64.00 360.00 A 296 296 0 0 1 103.66 212.00 Z" fill="#6FFFB0" stroke="none" opacity="0.18"/>
+  <text x="56.7" y="278.7" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♍</text>
+  <path d="M 28.00 360.00 A 332 332 0 0 0 72.48 526.00 L 103.66 508.00 A 296 296 0 0 1 64.00 360.00 Z" fill="#4FC3F7" stroke="none" opacity="0.18"/>
+  <text x="56.7" y="441.3" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♎</text>
+  <path d="M 72.48 526.00 A 332 332 0 0 0 194.00 647.52 L 212.00 616.34 A 296 296 0 0 1 103.66 508.00 Z" fill="#E040FB" stroke="none" opacity="0.18"/>
+  <text x="138.0" y="582.0" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♏</text>
+  <path d="M 194.00 647.52 A 332 332 0 0 0 360.00 692.00 L 360.00 656.00 A 296 296 0 0 1 212.00 616.34 Z" fill="#E8604C" stroke="none" opacity="0.18"/>
+  <text x="278.7" y="663.3" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♐</text>
+  <path d="M 360.00 692.00 A 332 332 0 0 0 526.00 647.52 L 508.00 616.34 A 296 296 0 0 1 360.00 656.00 Z" fill="#6FFFB0" stroke="none" opacity="0.18"/>
+  <text x="441.3" y="663.3" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♑</text>
+  <path d="M 526.00 647.52 A 332 332 0 0 0 647.52 526.00 L 616.34 508.00 A 296 296 0 0 1 508.00 616.34 Z" fill="#4FC3F7" stroke="none" opacity="0.18"/>
+  <text x="582.0" y="582.0" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♒</text>
+  <path d="M 647.52 526.00 A 332 332 0 0 0 692.00 360.00 L 656.00 360.00 A 296 296 0 0 1 616.34 508.00 Z" fill="#E040FB" stroke="none" opacity="0.18"/>
+  <text x="663.3" y="441.3" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♓</text>
+  <circle cx="360.0" cy="360.0" r="332" fill="none" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <circle cx="360.0" cy="360.0" r="296" fill="none" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <circle cx="360.0" cy="360.0" r="252" fill="none" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <circle cx="360.0" cy="360.0" r="92" fill="#0c1118" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="612.0" y1="360.0" x2="692.0" y2="360.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="578.2" y1="234.0" x2="647.5" y2="194.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="486.0" y1="141.8" x2="526.0" y2="72.5" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="360.0" y1="108.0" x2="360.0" y2="28.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="234.0" y1="141.8" x2="194.0" y2="72.5" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="141.8" y1="234.0" x2="72.5" y2="194.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="108.0" y1="360.0" x2="28.0" y2="360.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="141.8" y1="486.0" x2="72.5" y2="526.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="234.0" y1="578.2" x2="194.0" y2="647.5" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="360.0" y1="612.0" x2="360.0" y2="692.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="486.0" y1="578.2" x2="526.0" y2="647.5" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="578.2" y1="486.0" x2="647.5" y2="526.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <text x="166.8" y="411.8" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">1</text>
+  <text x="218.6" y="501.4" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">2</text>
+  <text x="308.2" y="553.2" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">3</text>
+  <text x="411.8" y="553.2" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">4</text>
+  <text x="501.4" y="501.4" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">5</text>
+  <text x="553.2" y="411.8" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">6</text>
+  <text x="553.2" y="308.2" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">7</text>
+  <text x="501.4" y="218.6" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">8</text>
+  <text x="411.8" y="166.8" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">9</text>
+  <text x="308.2" y="166.8" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">10</text>
+  <text x="218.6" y="218.6" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">11</text>
+  <text x="166.8" y="308.2" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">12</text>
+  <line x1="268.0" y1="360.0" x2="108.0" y2="360.0" stroke="#f0ebe0" stroke-width="1.6" opacity="0.9"/>
+  <line x1="280.3" y1="406.0" x2="141.8" y2="486.0" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <line x1="314.0" y1="439.7" x2="234.0" y2="578.2" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <line x1="360.0" y1="452.0" x2="360.0" y2="612.0" stroke="#f0ebe0" stroke-width="1.6" opacity="0.9"/>
+  <line x1="406.0" y1="439.7" x2="486.0" y2="578.2" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <line x1="439.7" y1="406.0" x2="578.2" y2="486.0" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <line x1="452.0" y1="360.0" x2="612.0" y2="360.0" stroke="#f0ebe0" stroke-width="1.6" opacity="0.9"/>
+  <line x1="439.7" y1="314.0" x2="578.2" y2="234.0" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <line x1="406.0" y1="280.3" x2="486.0" y2="141.8" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <line x1="360.0" y1="268.0" x2="360.0" y2="108.0" stroke="#f0ebe0" stroke-width="1.6" opacity="0.9"/>
+  <line x1="314.0" y1="280.3" x2="234.0" y2="141.8" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <line x1="280.3" y1="314.0" x2="141.8" y2="234.0" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <text x="2.0" y="360.0" fill="#7B6FE8" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif" letter-spacing="2">ASC</text>
+  <text x="360.0" y="718.0" fill="#7B6FE8" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif" letter-spacing="2">IC</text>
+  <text x="718.0" y="360.0" fill="#7B6FE8" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif" letter-spacing="2">DC</text>
+  <text x="360.0" y="2.0" fill="#7B6FE8" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif" letter-spacing="2">MC</text>
+  <path d="M 28.00 360.00 A 332 332 0 0 0 72.48 526.00 L 103.66 508.00 A 296 296 0 0 1 64.00 360.00 Z" fill="#4FC3F7" stroke="none" opacity="0.45"/>
+  <text x="315.0" y="554.9" fill="#f0ebe0" font-size="24" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif">☉</text>
+  <text x="320.0" y="533.4" fill="rgba(240,235,224,0.40)" font-size="10" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">17°</text>
+  <text x="477.6" y="521.8" fill="#f0ebe0" font-size="24" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif">☾</text>
+  <text x="464.6" y="504.0" fill="rgba(240,235,224,0.40)" font-size="10" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">06°</text>
+  <text x="190.4" y="466.0" fill="#f0ebe0" font-size="24" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif">♀</text>
+  <text x="209.0" y="454.3" fill="rgba(240,235,224,0.40)" font-size="10" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">02°</text>
+  <text x="206.8" y="231.4" fill="#f0ebe0" font-size="24" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif">♂</text>
+  <text x="223.6" y="245.6" fill="rgba(240,235,224,0.40)" font-size="10" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">20°</text>
+  <text x="305.3" y="518.8" fill="#f0ebe0" font-size="24" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif">☿</text>
+  <text x="312.5" y="498.0" fill="rgba(240,235,224,0.40)" font-size="10" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">11°</text>
+  <text x="360.0" y="354.0" fill="#f0ebe0" font-size="16" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" font-style="italic">Libra Rising</text>
+  <text x="360.0" y="378.0" fill="rgba(240,235,224,0.70)" font-size="11" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif" letter-spacing="1.5">Charm · diplomacy · balance</text>
+  <line x1="264.0" y1="360.0" x2="10.0" y2="360.0" stroke="#FFD54F" stroke-width="3" opacity="0.85" filter="url(#glow)"/>
+</svg>
+          <span class="hint">
+            <span>Click the chart for the reading</span>
+            <span class="ico">+</span>
+          </span>
+        </button>
+
+        <div class="reading">
+          <div class="placeholder" id="ph-rel-3">
+            <span class="ico">✶</span><br>
+            Click the image on the left to reveal the reading.
+          </div>
+          <div class="reading-content" id="rd-rel-3">
+            <h4>Example — Libra Rising vs. Capricorn Rising</h4>
+            <p><strong>Libra Rising</strong>, ruled by Venus, brings grace, charm, and diplomacy into first impressions. They adapt easily to others' moods — sometimes too easily, leaning on external validation to feel okay. The growth path: learning to decide from inner balance rather than constant comparison. When integrated, Libra Rising shows the art of <em>peaceful connection without self-loss</em>.</p>
+            <p><strong>Capricorn Rising</strong>, ruled by Saturn, approaches relationships cautiously and seriously. They take time to open up and value stability, reliability, and long-term potential. They appear reserved at first and prefer to build trust gradually — showing commitment through <em>consistency</em> rather than emotional intensity. Read the slow start as care, not coldness.</p>
+            <p><strong>Pro move:</strong> always check the Ascendant ruler. Where it sits (its house) often tells you where this person <em>actually</em> directs their love energy, regardless of what their words say.</p>
+            <div class="tags">
+              <span class="tag">Ascendant = style</span>
+              <span class="tag">Ruler = projection</span>
+              <span class="tag">First impression filter</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="practice">
+        <span class="p-eyebrow">★ Try it on your own chart</span>
+        <p>Find your Ascendant — it's the sign on the left horizon line of the wheel (the 9-o'clock position).</p>
+        <ul>
+          <li>What's the first impression people typically have of you? Does it match?</li>
+          <li>Find the planet that <em>rules</em> your Ascendant sign and note where it sits.</li>
+          <li>Compare: does your Sun-Moon story match this outer style, or contradict it?</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 4 · SYNTHESIS (Relationships) -->
+  <section class="step synth" id="rel-step4">
+    <div class="container">
+      <div class="step-head">
+        <div class="step-num n4">4</div>
+        <div class="text">
+          <span class="eyebrow">▸ Step 4 of 4 — Synthesis</span>
+          <h2>Now <em>assemble</em> the pattern.</h2>
+          <p class="sub">Compare your Sun-Moon, Venus, and Ascendant side by side. Repetition is the message: if several of them emphasize Fire, relationships thrive on activity and shared goals. If Water predominates, emotional bonding is essential. Conflicts between elements explain attraction <em>and</em> friction.</p>
+        </div>
+      </div>
+
+      <div class="synth-grid">
+        <div class="synth-card"><div class="name">Fire-heavy</div><p>Action, novelty, and shared goals. Relationships need momentum or they fizzle.</p></div>
+        <div class="synth-card cyan"><div class="name">Air-heavy</div><p>Conversation, ideas, intellectual chemistry. Silence reads as distance.</p></div>
+        <div class="synth-card coral"><div class="name">Water-heavy</div><p>Emotional bonding, intuition, depth. Logic-only relationships feel hollow.</p></div>
+        <div class="synth-card gold"><div class="name">Earth-heavy</div><p>Loyalty, consistency, real-world reliability. Big gestures matter less than showing up.</p></div>
+      </div>
+
+      <div class="tip-card">
+        <span class="t-eyebrow">★ Reading rule</span>
+        <p>Astrology works by repetition. <strong>Patterns speak louder than single aspects.</strong> Write down each repeating theme — fire that keeps showing up, water that keeps showing up, the same house mentioned twice. That repetition <em>is</em> the main lesson the chart offers about love.</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- TRACK B — CAREER -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="track-content" id="track-car" data-name="Career">
+
+  <!-- FOUNDATION -->
+  <section class="foundation" id="car-foundation">
+    <div class="container grid">
+      <div>
+        <span class="eyebrow">▸ Foundation — Why this track exists</span>
+        <h2>Astrology for <em>career</em> is about <em>direction</em>, not job titles.</h2>
+        <p>Career questions usually arrive disguised as confusion: "I don't know what I'm good at." "Why do I keep feeling stuck?" "What suits me?" The chart won't hand back a job title — it points at <em>strengths</em>, <em>direction</em>, and the <em>environment</em> that lets a person actually shine.</p>
+        <p>For a mini reading on career, three placements do most of the lifting — Sun &amp; Moon, the Midheaven, and the Ascendant. Same algorithm as the Relationships track, with Venus swapped for the MC.</p>
+        <div class="tools">
+          <div class="tool"><div class="t-name">Birth time matters</div><div class="t-desc">MC + Ascendant depend on it. Without it, this reading isn't reliable.</div></div>
+          <div class="tool"><div class="t-name">Astro.com / Astro-Seek</div><div class="t-desc">Either works — pick one and stick with it.</div></div>
+          <div class="tool"><div class="t-name">Be consistent</div><div class="t-desc">Same calculator across charts builds your eye for patterns.</div></div>
+        </div>
+      </div>
+      <div class="foundation-deco">
+        <img src="images/brand-sun-orange.png" alt="">
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 1 · SUN & MOON (Career) -->
+  <section class="step" id="car-step1">
+    <div class="container">
+      <div class="step-head">
+        <div class="step-num">1</div>
+        <div class="text">
+          <span class="eyebrow">▸ Step 1 of 4</span>
+          <h2>Sun &amp; Moon — <em>talents</em> &amp; satisfaction</h2>
+          <p class="sub">The Sun shows where you want to <em>shine</em> — what you're naturally good at and where you express your will. The Moon shows what feels emotionally <em>fulfilling</em> and safe. In a career reading, ask: where does this person want to lead, and what kind of work makes them feel okay at the end of the day?</p>
+        </div>
+      </div>
+
+      <div class="interplay">
+        <button class="chart-card" data-reveal="car-1" aria-label="Click to reveal Sun and Moon career reading">
+          <span class="focus-tag">Sun · Moon · 4H</span>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 720" width="100%" height="100%" role="img" aria-label="Capricorn ☉ ☾ in 4H">
+  <style>
+    text { font-family: "Lora", "Apple Symbols", "Segoe UI Symbol", "Symbola", "Noto Sans Symbols", "DejaVu Sans", serif; }
+    .glyph { font-family: "Apple Symbols", "Segoe UI Symbol", "Symbola", "Noto Sans Symbols", "DejaVu Sans", "Lora", serif; }
+  </style>
+  <defs>
+        <radialGradient id="bgGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#141d2b" stop-opacity="1"/>
+            <stop offset="100%" stop-color="#0c1118" stop-opacity="1"/>
+        </radialGradient>
+        <filter id="glow"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    </defs>
+  <circle cx="360.0" cy="360.0" r="340" fill="url(#bgGrad)" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <path d="M 692.00 360.00 A 332 332 0 0 0 647.52 194.00 L 616.34 212.00 A 296 296 0 0 1 656.00 360.00 Z" fill="#E8604C" stroke="none" opacity="0.18"/>
+  <text x="663.3" y="278.7" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♈</text>
+  <path d="M 647.52 194.00 A 332 332 0 0 0 526.00 72.48 L 508.00 103.66 A 296 296 0 0 1 616.34 212.00 Z" fill="#6FFFB0" stroke="none" opacity="0.18"/>
+  <text x="582.0" y="138.0" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♉</text>
+  <path d="M 526.00 72.48 A 332 332 0 0 0 360.00 28.00 L 360.00 64.00 A 296 296 0 0 1 508.00 103.66 Z" fill="#4FC3F7" stroke="none" opacity="0.18"/>
+  <text x="441.3" y="56.7" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♊</text>
+  <path d="M 360.00 28.00 A 332 332 0 0 0 194.00 72.48 L 212.00 103.66 A 296 296 0 0 1 360.00 64.00 Z" fill="#E040FB" stroke="none" opacity="0.18"/>
+  <text x="278.7" y="56.7" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♋</text>
+  <path d="M 194.00 72.48 A 332 332 0 0 0 72.48 194.00 L 103.66 212.00 A 296 296 0 0 1 212.00 103.66 Z" fill="#E8604C" stroke="none" opacity="0.18"/>
+  <text x="138.0" y="138.0" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♌</text>
+  <path d="M 72.48 194.00 A 332 332 0 0 0 28.00 360.00 L 64.00 360.00 A 296 296 0 0 1 103.66 212.00 Z" fill="#6FFFB0" stroke="none" opacity="0.18"/>
+  <text x="56.7" y="278.7" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♍</text>
+  <path d="M 28.00 360.00 A 332 332 0 0 0 72.48 526.00 L 103.66 508.00 A 296 296 0 0 1 64.00 360.00 Z" fill="#4FC3F7" stroke="none" opacity="0.18"/>
+  <text x="56.7" y="441.3" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♎</text>
+  <path d="M 72.48 526.00 A 332 332 0 0 0 194.00 647.52 L 212.00 616.34 A 296 296 0 0 1 103.66 508.00 Z" fill="#E040FB" stroke="none" opacity="0.18"/>
+  <text x="138.0" y="582.0" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♏</text>
+  <path d="M 194.00 647.52 A 332 332 0 0 0 360.00 692.00 L 360.00 656.00 A 296 296 0 0 1 212.00 616.34 Z" fill="#E8604C" stroke="none" opacity="0.18"/>
+  <text x="278.7" y="663.3" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♐</text>
+  <path d="M 360.00 692.00 A 332 332 0 0 0 526.00 647.52 L 508.00 616.34 A 296 296 0 0 1 360.00 656.00 Z" fill="#6FFFB0" stroke="none" opacity="0.18"/>
+  <text x="441.3" y="663.3" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♑</text>
+  <path d="M 526.00 647.52 A 332 332 0 0 0 647.52 526.00 L 616.34 508.00 A 296 296 0 0 1 508.00 616.34 Z" fill="#4FC3F7" stroke="none" opacity="0.18"/>
+  <text x="582.0" y="582.0" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♒</text>
+  <path d="M 647.52 526.00 A 332 332 0 0 0 692.00 360.00 L 656.00 360.00 A 296 296 0 0 1 616.34 508.00 Z" fill="#E040FB" stroke="none" opacity="0.18"/>
+  <text x="663.3" y="441.3" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♓</text>
+  <circle cx="360.0" cy="360.0" r="332" fill="none" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <circle cx="360.0" cy="360.0" r="296" fill="none" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <circle cx="360.0" cy="360.0" r="252" fill="none" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <circle cx="360.0" cy="360.0" r="92" fill="#0c1118" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="612.0" y1="360.0" x2="692.0" y2="360.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="578.2" y1="234.0" x2="647.5" y2="194.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="486.0" y1="141.8" x2="526.0" y2="72.5" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="360.0" y1="108.0" x2="360.0" y2="28.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="234.0" y1="141.8" x2="194.0" y2="72.5" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="141.8" y1="234.0" x2="72.5" y2="194.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="108.0" y1="360.0" x2="28.0" y2="360.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="141.8" y1="486.0" x2="72.5" y2="526.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="234.0" y1="578.2" x2="194.0" y2="647.5" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="360.0" y1="612.0" x2="360.0" y2="692.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="486.0" y1="578.2" x2="526.0" y2="647.5" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="578.2" y1="486.0" x2="647.5" y2="526.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <text x="166.8" y="411.8" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">1</text>
+  <text x="218.6" y="501.4" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">2</text>
+  <text x="308.2" y="553.2" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">3</text>
+  <text x="411.8" y="553.2" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">4</text>
+  <text x="501.4" y="501.4" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">5</text>
+  <text x="553.2" y="411.8" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">6</text>
+  <text x="553.2" y="308.2" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">7</text>
+  <text x="501.4" y="218.6" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">8</text>
+  <text x="411.8" y="166.8" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">9</text>
+  <text x="308.2" y="166.8" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">10</text>
+  <text x="218.6" y="218.6" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">11</text>
+  <text x="166.8" y="308.2" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">12</text>
+  <line x1="268.0" y1="360.0" x2="108.0" y2="360.0" stroke="#f0ebe0" stroke-width="1.6" opacity="0.9"/>
+  <line x1="280.3" y1="406.0" x2="141.8" y2="486.0" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <line x1="314.0" y1="439.7" x2="234.0" y2="578.2" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <line x1="360.0" y1="452.0" x2="360.0" y2="612.0" stroke="#f0ebe0" stroke-width="1.6" opacity="0.9"/>
+  <line x1="406.0" y1="439.7" x2="486.0" y2="578.2" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <line x1="439.7" y1="406.0" x2="578.2" y2="486.0" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <line x1="452.0" y1="360.0" x2="612.0" y2="360.0" stroke="#f0ebe0" stroke-width="1.6" opacity="0.9"/>
+  <line x1="439.7" y1="314.0" x2="578.2" y2="234.0" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <line x1="406.0" y1="280.3" x2="486.0" y2="141.8" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <line x1="360.0" y1="268.0" x2="360.0" y2="108.0" stroke="#f0ebe0" stroke-width="1.6" opacity="0.9"/>
+  <line x1="314.0" y1="280.3" x2="234.0" y2="141.8" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <line x1="280.3" y1="314.0" x2="141.8" y2="234.0" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <text x="2.0" y="360.0" fill="#7B6FE8" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif" letter-spacing="2">ASC</text>
+  <text x="360.0" y="718.0" fill="#7B6FE8" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif" letter-spacing="2">IC</text>
+  <text x="718.0" y="360.0" fill="#7B6FE8" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif" letter-spacing="2">DC</text>
+  <text x="360.0" y="2.0" fill="#7B6FE8" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif" letter-spacing="2">MC</text>
+  <path d="M 360.00 612.00 A 252 252 0 0 0 486.00 578.24 L 406.00 439.67 A 92 92 0 0 1 360.00 452.00 Z" fill="#6FFFB0" stroke="none" opacity="0.18"/>
+  <circle cx="401.6" cy="555.6" r="22" fill="#6FFFB0" opacity="0.32" filter="url(#glow)"/>
+  <circle cx="401.6" cy="555.6" r="20" fill="none" stroke="#6FFFB0" stroke-width="2"/>
+  <text x="401.6" y="555.6" fill="#f0ebe0" font-size="24" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif">☉</text>
+  <text x="397.0" y="534.1" fill="rgba(240,235,224,0.40)" font-size="10" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">12°</text>
+  <circle cx="411.9" cy="519.8" r="22" fill="#6FFFB0" opacity="0.32" filter="url(#glow)"/>
+  <circle cx="411.9" cy="519.8" r="20" fill="none" stroke="#6FFFB0" stroke-width="2"/>
+  <text x="411.9" y="519.8" fill="#f0ebe0" font-size="24" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif">☾</text>
+  <text x="405.1" y="498.9" fill="rgba(240,235,224,0.40)" font-size="10" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">18°</text>
+  <text x="428.3" y="513.5" fill="#f0ebe0" font-size="24" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif">♄</text>
+  <text x="419.4" y="493.4" fill="rgba(240,235,224,0.40)" font-size="10" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">24°</text>
+  <text x="468.9" y="527.7" fill="#f0ebe0" font-size="24" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif">♀</text>
+  <text x="456.9" y="509.3" fill="rgba(240,235,224,0.40)" font-size="10" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">03°</text>
+  <text x="544.1" y="438.1" fill="#f0ebe0" font-size="24" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif">♂</text>
+  <text x="523.8" y="429.6" fill="rgba(240,235,224,0.40)" font-size="10" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">07°</text>
+  <text x="360.0" y="354.0" fill="#f0ebe0" font-size="16" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" font-style="italic">Capricorn ☉ ☾ in 4H</text>
+  <text x="360.0" y="378.0" fill="rgba(240,235,224,0.70)" font-size="11" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif" letter-spacing="1.5">Discipline · privacy · long horizon</text>
+</svg>
+          <span class="hint">
+            <span>Click the chart for the reading</span>
+            <span class="ico">+</span>
+          </span>
+        </button>
+
+        <div class="reading">
+          <div class="placeholder" id="ph-car-1">
+            <span class="ico">✶</span><br>
+            Click the image on the left to reveal the reading.
+          </div>
+          <div class="reading-content" id="rd-car-1">
+            <h4>Example — Sun + Moon in Capricorn, 4th house</h4>
+            <p>Both luminaries sitting in <strong>Capricorn in the 4th house</strong> describe someone who is <em>disciplined, responsible, and focused on building stability</em>. Their talents show up in structured work, long-term planning, and creating something secure that lasts.</p>
+            <p>The 4th-house emphasis makes home, family, or a controlled private environment central — they may do their best work from a quiet, ordered base rather than an open-plan office. This person feels fulfilled when they can <strong>build something stable and meaningful over time</strong>, not when they're chasing fast wins.</p>
+            <p><strong>Read this combo as a signal</strong>: don't push them into volatile, high-novelty fields. Their growth happens through depth and patience, not through pivots.</p>
+            <div class="tags">
+              <span class="tag">Capricorn × 4H</span>
+              <span class="tag">Discipline + privacy</span>
+              <span class="tag">Long-horizon work</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="practice">
+        <span class="p-eyebrow">★ Try it on your own chart</span>
+        <p>Find your Sun and Moon. Note both signs and both houses.</p>
+        <ul>
+          <li>Sign = <em>flavor</em> of the talent. House = <em>arena</em> where it expresses.</li>
+          <li>If they're in the same sign or same house, that's a strong, focused talent line — name it concretely.</li>
+          <li>If they conflict, write the tension as a sentence: "I want to lead in ___, but I feel safe in ___."</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 2 · MIDHEAVEN -->
+  <section class="step" id="car-step2">
+    <div class="container">
+      <div class="step-head">
+        <div class="step-num n2">2</div>
+        <div class="text">
+          <span class="eyebrow">▸ Step 2 of 4</span>
+          <h2>Midheaven — your <em>career direction</em></h2>
+          <p class="sub">The Midheaven (MC) sits at the very top of the chart — the 12-o'clock point. It represents the <em>overall direction</em> of your career, the type of environment you're drawn to, and how you want to be seen professionally. It's the public face of your ambition.</p>
+        </div>
+      </div>
+
+      <div class="interplay">
+        <button class="chart-card" data-reveal="car-2" aria-label="Click to reveal Midheaven reading">
+          <span class="focus-tag">Midheaven</span>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 720" width="100%" height="100%" role="img" aria-label="Aries Midheaven">
+  <style>
+    text { font-family: "Lora", "Apple Symbols", "Segoe UI Symbol", "Symbola", "Noto Sans Symbols", "DejaVu Sans", serif; }
+    .glyph { font-family: "Apple Symbols", "Segoe UI Symbol", "Symbola", "Noto Sans Symbols", "DejaVu Sans", "Lora", serif; }
+  </style>
+  <defs>
+        <radialGradient id="bgGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#141d2b" stop-opacity="1"/>
+            <stop offset="100%" stop-color="#0c1118" stop-opacity="1"/>
+        </radialGradient>
+        <filter id="glow"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    </defs>
+  <circle cx="360.0" cy="360.0" r="340" fill="url(#bgGrad)" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <path d="M 360.00 28.00 A 332 332 0 0 0 194.00 72.48 L 212.00 103.66 A 296 296 0 0 1 360.00 64.00 Z" fill="#E8604C" stroke="none" opacity="0.18"/>
+  <text x="278.7" y="56.7" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♈</text>
+  <path d="M 194.00 72.48 A 332 332 0 0 0 72.48 194.00 L 103.66 212.00 A 296 296 0 0 1 212.00 103.66 Z" fill="#6FFFB0" stroke="none" opacity="0.18"/>
+  <text x="138.0" y="138.0" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♉</text>
+  <path d="M 72.48 194.00 A 332 332 0 0 0 28.00 360.00 L 64.00 360.00 A 296 296 0 0 1 103.66 212.00 Z" fill="#4FC3F7" stroke="none" opacity="0.18"/>
+  <text x="56.7" y="278.7" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♊</text>
+  <path d="M 28.00 360.00 A 332 332 0 0 0 72.48 526.00 L 103.66 508.00 A 296 296 0 0 1 64.00 360.00 Z" fill="#E040FB" stroke="none" opacity="0.18"/>
+  <text x="56.7" y="441.3" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♋</text>
+  <path d="M 72.48 526.00 A 332 332 0 0 0 194.00 647.52 L 212.00 616.34 A 296 296 0 0 1 103.66 508.00 Z" fill="#E8604C" stroke="none" opacity="0.18"/>
+  <text x="138.0" y="582.0" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♌</text>
+  <path d="M 194.00 647.52 A 332 332 0 0 0 360.00 692.00 L 360.00 656.00 A 296 296 0 0 1 212.00 616.34 Z" fill="#6FFFB0" stroke="none" opacity="0.18"/>
+  <text x="278.7" y="663.3" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♍</text>
+  <path d="M 360.00 692.00 A 332 332 0 0 0 526.00 647.52 L 508.00 616.34 A 296 296 0 0 1 360.00 656.00 Z" fill="#4FC3F7" stroke="none" opacity="0.18"/>
+  <text x="441.3" y="663.3" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♎</text>
+  <path d="M 526.00 647.52 A 332 332 0 0 0 647.52 526.00 L 616.34 508.00 A 296 296 0 0 1 508.00 616.34 Z" fill="#E040FB" stroke="none" opacity="0.18"/>
+  <text x="582.0" y="582.0" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♏</text>
+  <path d="M 647.52 526.00 A 332 332 0 0 0 692.00 360.00 L 656.00 360.00 A 296 296 0 0 1 616.34 508.00 Z" fill="#E8604C" stroke="none" opacity="0.18"/>
+  <text x="663.3" y="441.3" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♐</text>
+  <path d="M 692.00 360.00 A 332 332 0 0 0 647.52 194.00 L 616.34 212.00 A 296 296 0 0 1 656.00 360.00 Z" fill="#6FFFB0" stroke="none" opacity="0.18"/>
+  <text x="663.3" y="278.7" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♑</text>
+  <path d="M 647.52 194.00 A 332 332 0 0 0 526.00 72.48 L 508.00 103.66 A 296 296 0 0 1 616.34 212.00 Z" fill="#4FC3F7" stroke="none" opacity="0.18"/>
+  <text x="582.0" y="138.0" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♒</text>
+  <path d="M 526.00 72.48 A 332 332 0 0 0 360.00 28.00 L 360.00 64.00 A 296 296 0 0 1 508.00 103.66 Z" fill="#E040FB" stroke="none" opacity="0.18"/>
+  <text x="441.3" y="56.7" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♓</text>
+  <circle cx="360.0" cy="360.0" r="332" fill="none" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <circle cx="360.0" cy="360.0" r="296" fill="none" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <circle cx="360.0" cy="360.0" r="252" fill="none" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <circle cx="360.0" cy="360.0" r="92" fill="#0c1118" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="360.0" y1="108.0" x2="360.0" y2="28.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="234.0" y1="141.8" x2="194.0" y2="72.5" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="141.8" y1="234.0" x2="72.5" y2="194.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="108.0" y1="360.0" x2="28.0" y2="360.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="141.8" y1="486.0" x2="72.5" y2="526.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="234.0" y1="578.2" x2="194.0" y2="647.5" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="360.0" y1="612.0" x2="360.0" y2="692.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="486.0" y1="578.2" x2="526.0" y2="647.5" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="578.2" y1="486.0" x2="647.5" y2="526.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="612.0" y1="360.0" x2="692.0" y2="360.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="578.2" y1="234.0" x2="647.5" y2="194.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="486.0" y1="141.8" x2="526.0" y2="72.5" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <text x="166.8" y="411.8" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">1</text>
+  <text x="218.6" y="501.4" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">2</text>
+  <text x="308.2" y="553.2" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">3</text>
+  <text x="411.8" y="553.2" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">4</text>
+  <text x="501.4" y="501.4" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">5</text>
+  <text x="553.2" y="411.8" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">6</text>
+  <text x="553.2" y="308.2" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">7</text>
+  <text x="501.4" y="218.6" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">8</text>
+  <text x="411.8" y="166.8" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">9</text>
+  <text x="308.2" y="166.8" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">10</text>
+  <text x="218.6" y="218.6" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">11</text>
+  <text x="166.8" y="308.2" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">12</text>
+  <line x1="268.0" y1="360.0" x2="108.0" y2="360.0" stroke="#f0ebe0" stroke-width="1.6" opacity="0.9"/>
+  <line x1="280.3" y1="406.0" x2="141.8" y2="486.0" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <line x1="314.0" y1="439.7" x2="234.0" y2="578.2" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <line x1="360.0" y1="452.0" x2="360.0" y2="612.0" stroke="#f0ebe0" stroke-width="1.6" opacity="0.9"/>
+  <line x1="406.0" y1="439.7" x2="486.0" y2="578.2" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <line x1="439.7" y1="406.0" x2="578.2" y2="486.0" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <line x1="452.0" y1="360.0" x2="612.0" y2="360.0" stroke="#f0ebe0" stroke-width="1.6" opacity="0.9"/>
+  <line x1="439.7" y1="314.0" x2="578.2" y2="234.0" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <line x1="406.0" y1="280.3" x2="486.0" y2="141.8" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <line x1="360.0" y1="268.0" x2="360.0" y2="108.0" stroke="#f0ebe0" stroke-width="1.6" opacity="0.9"/>
+  <line x1="314.0" y1="280.3" x2="234.0" y2="141.8" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <line x1="280.3" y1="314.0" x2="141.8" y2="234.0" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <text x="2.0" y="360.0" fill="#7B6FE8" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif" letter-spacing="2">ASC</text>
+  <text x="360.0" y="718.0" fill="#7B6FE8" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif" letter-spacing="2">IC</text>
+  <text x="718.0" y="360.0" fill="#7B6FE8" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif" letter-spacing="2">DC</text>
+  <text x="360.0" y="2.0" fill="#7B6FE8" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif" letter-spacing="2">MC</text>
+  <path d="M 360.00 28.00 A 332 332 0 0 0 194.00 72.48 L 212.00 103.66 A 296 296 0 0 1 360.00 64.00 Z" fill="#E8604C" stroke="none" opacity="0.45"/>
+  <text x="194.2" y="471.8" fill="#f0ebe0" font-size="24" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif">☉</text>
+  <text x="212.4" y="459.5" fill="rgba(240,235,224,0.40)" font-size="10" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">04°</text>
+  <text x="557.5" y="391.3" fill="#f0ebe0" font-size="24" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif">☾</text>
+  <text x="535.8" y="387.8" fill="rgba(240,235,224,0.40)" font-size="10" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">21°</text>
+  <circle cx="308.2" cy="166.8" r="22" fill="#E8604C" opacity="0.32" filter="url(#glow)"/>
+  <circle cx="308.2" cy="166.8" r="20" fill="none" stroke="#E8604C" stroke-width="2"/>
+  <text x="308.2" y="166.8" fill="#f0ebe0" font-size="24" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif">♂</text>
+  <text x="313.9" y="188.1" fill="rgba(240,235,224,0.40)" font-size="10" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">15°</text>
+  <text x="162.5" y="391.3" fill="#f0ebe0" font-size="24" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif">☿</text>
+  <text x="184.2" y="387.8" fill="rgba(240,235,224,0.40)" font-size="10" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">09°</text>
+  <text x="418.5" y="551.3" fill="#f0ebe0" font-size="24" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif">♄</text>
+  <text x="412.0" y="530.2" fill="rgba(240,235,224,0.40)" font-size="10" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">17°</text>
+  <text x="360.0" y="354.0" fill="#f0ebe0" font-size="16" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" font-style="italic">Aries Midheaven</text>
+  <text x="360.0" y="378.0" fill="rgba(240,235,224,0.70)" font-size="11" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif" letter-spacing="1.5">Initiative · leadership · launch energy</text>
+  <line x1="360.0" y1="264.0" x2="360.0" y2="10.0" stroke="#E8604C" stroke-width="3" opacity="0.85" filter="url(#glow)"/>
+</svg>
+          <span class="hint">
+            <span>Click the chart for the reading</span>
+            <span class="ico">+</span>
+          </span>
+        </button>
+
+        <div class="reading">
+          <div class="placeholder" id="ph-car-2">
+            <span class="ico">✶</span><br>
+            Click the image on the left to reveal the reading.
+          </div>
+          <div class="reading-content" id="rd-car-2">
+            <h4>Example — Midheaven in Aries</h4>
+            <p>An <strong>Aries Midheaven</strong> points to a career path that requires <em>initiative, independence,</em> and <em>leadership</em>. This person thrives in dynamic environments where they can <strong>take action, start projects, and make quick decisions</strong>.</p>
+            <p>They feel restricted in passive roles — committee work, slow consensus-building, anything where they have to wait their turn. They need autonomy to feel fulfilled, and they're often happiest as the first person doing a thing rather than the tenth person doing it well.</p>
+            <p><strong>Practical translation:</strong> founder roles, lead-this-launch energy, sports, emergency professions, anything with "first" or "head of" in the title. Read the MC as the <em>vector</em> the career wants to point in — not the specific job.</p>
+            <div class="tags">
+              <span class="tag">Aries MC</span>
+              <span class="tag">Initiative</span>
+              <span class="tag">Lead, don't follow</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="practice">
+        <span class="p-eyebrow">★ Try it on your own chart</span>
+        <p>Find your Midheaven — it's the cusp of the 10th house, sitting at the top of the wheel.</p>
+        <ul>
+          <li>What's the sign? Translate it into one direction-word: <em>lead, build, communicate, nurture, perform, serve, balance, transform</em>…</li>
+          <li>Where does the MC's ruling planet sit? That house describes <em>where</em> the ambition actually plays out.</li>
+          <li>Does your current job match the direction? If not — what's the smallest shift toward the MC vector you could make this quarter?</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 3 · ASCENDANT (Career) -->
+  <section class="step" id="car-step3">
+    <div class="container">
+      <div class="step-head">
+        <div class="step-num n3">3</div>
+        <div class="text">
+          <span class="eyebrow">▸ Step 3 of 4</span>
+          <h2>Ascendant — <em>skills</em> &amp; self-expression</h2>
+          <p class="sub">The Ascendant shows how you act in real situations — your behaviour, your approach to work, and the skills you naturally rely on. It's also how others perceive you the moment you walk into a meeting. In a career reading, treat the Ascendant as the <em>method</em> someone uses to actually do the work.</p>
+        </div>
+      </div>
+
+      <div class="interplay">
+        <button class="chart-card" data-reveal="car-3" aria-label="Click to reveal Ascendant career reading">
+          <span class="focus-tag">Ascendant</span>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 720" width="100%" height="100%" role="img" aria-label="Gemini Rising">
+  <style>
+    text { font-family: "Lora", "Apple Symbols", "Segoe UI Symbol", "Symbola", "Noto Sans Symbols", "DejaVu Sans", serif; }
+    .glyph { font-family: "Apple Symbols", "Segoe UI Symbol", "Symbola", "Noto Sans Symbols", "DejaVu Sans", "Lora", serif; }
+  </style>
+  <defs>
+        <radialGradient id="bgGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#141d2b" stop-opacity="1"/>
+            <stop offset="100%" stop-color="#0c1118" stop-opacity="1"/>
+        </radialGradient>
+        <filter id="glow"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    </defs>
+  <circle cx="360.0" cy="360.0" r="340" fill="url(#bgGrad)" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <path d="M 194.00 72.48 A 332 332 0 0 0 72.48 194.00 L 103.66 212.00 A 296 296 0 0 1 212.00 103.66 Z" fill="#E8604C" stroke="none" opacity="0.18"/>
+  <text x="138.0" y="138.0" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♈</text>
+  <path d="M 72.48 194.00 A 332 332 0 0 0 28.00 360.00 L 64.00 360.00 A 296 296 0 0 1 103.66 212.00 Z" fill="#6FFFB0" stroke="none" opacity="0.18"/>
+  <text x="56.7" y="278.7" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♉</text>
+  <path d="M 28.00 360.00 A 332 332 0 0 0 72.48 526.00 L 103.66 508.00 A 296 296 0 0 1 64.00 360.00 Z" fill="#4FC3F7" stroke="none" opacity="0.18"/>
+  <text x="56.7" y="441.3" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♊</text>
+  <path d="M 72.48 526.00 A 332 332 0 0 0 194.00 647.52 L 212.00 616.34 A 296 296 0 0 1 103.66 508.00 Z" fill="#E040FB" stroke="none" opacity="0.18"/>
+  <text x="138.0" y="582.0" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♋</text>
+  <path d="M 194.00 647.52 A 332 332 0 0 0 360.00 692.00 L 360.00 656.00 A 296 296 0 0 1 212.00 616.34 Z" fill="#E8604C" stroke="none" opacity="0.18"/>
+  <text x="278.7" y="663.3" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♌</text>
+  <path d="M 360.00 692.00 A 332 332 0 0 0 526.00 647.52 L 508.00 616.34 A 296 296 0 0 1 360.00 656.00 Z" fill="#6FFFB0" stroke="none" opacity="0.18"/>
+  <text x="441.3" y="663.3" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♍</text>
+  <path d="M 526.00 647.52 A 332 332 0 0 0 647.52 526.00 L 616.34 508.00 A 296 296 0 0 1 508.00 616.34 Z" fill="#4FC3F7" stroke="none" opacity="0.18"/>
+  <text x="582.0" y="582.0" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♎</text>
+  <path d="M 647.52 526.00 A 332 332 0 0 0 692.00 360.00 L 656.00 360.00 A 296 296 0 0 1 616.34 508.00 Z" fill="#E040FB" stroke="none" opacity="0.18"/>
+  <text x="663.3" y="441.3" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♏</text>
+  <path d="M 692.00 360.00 A 332 332 0 0 0 647.52 194.00 L 616.34 212.00 A 296 296 0 0 1 656.00 360.00 Z" fill="#E8604C" stroke="none" opacity="0.18"/>
+  <text x="663.3" y="278.7" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♐</text>
+  <path d="M 647.52 194.00 A 332 332 0 0 0 526.00 72.48 L 508.00 103.66 A 296 296 0 0 1 616.34 212.00 Z" fill="#6FFFB0" stroke="none" opacity="0.18"/>
+  <text x="582.0" y="138.0" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♑</text>
+  <path d="M 526.00 72.48 A 332 332 0 0 0 360.00 28.00 L 360.00 64.00 A 296 296 0 0 1 508.00 103.66 Z" fill="#4FC3F7" stroke="none" opacity="0.18"/>
+  <text x="441.3" y="56.7" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♒</text>
+  <path d="M 360.00 28.00 A 332 332 0 0 0 194.00 72.48 L 212.00 103.66 A 296 296 0 0 1 360.00 64.00 Z" fill="#E040FB" stroke="none" opacity="0.18"/>
+  <text x="278.7" y="56.7" fill="#f0ebe0" font-size="22" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" opacity="0.95">♓</text>
+  <circle cx="360.0" cy="360.0" r="332" fill="none" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <circle cx="360.0" cy="360.0" r="296" fill="none" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <circle cx="360.0" cy="360.0" r="252" fill="none" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <circle cx="360.0" cy="360.0" r="92" fill="#0c1118" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="234.0" y1="141.8" x2="194.0" y2="72.5" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="141.8" y1="234.0" x2="72.5" y2="194.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="108.0" y1="360.0" x2="28.0" y2="360.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="141.8" y1="486.0" x2="72.5" y2="526.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="234.0" y1="578.2" x2="194.0" y2="647.5" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="360.0" y1="612.0" x2="360.0" y2="692.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="486.0" y1="578.2" x2="526.0" y2="647.5" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="578.2" y1="486.0" x2="647.5" y2="526.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="612.0" y1="360.0" x2="692.0" y2="360.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="578.2" y1="234.0" x2="647.5" y2="194.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="486.0" y1="141.8" x2="526.0" y2="72.5" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <line x1="360.0" y1="108.0" x2="360.0" y2="28.0" stroke="rgba(240,235,224,0.18)" stroke-width="1"/>
+  <text x="166.8" y="411.8" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">1</text>
+  <text x="218.6" y="501.4" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">2</text>
+  <text x="308.2" y="553.2" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">3</text>
+  <text x="411.8" y="553.2" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">4</text>
+  <text x="501.4" y="501.4" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">5</text>
+  <text x="553.2" y="411.8" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">6</text>
+  <text x="553.2" y="308.2" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">7</text>
+  <text x="501.4" y="218.6" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">8</text>
+  <text x="411.8" y="166.8" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">9</text>
+  <text x="308.2" y="166.8" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">10</text>
+  <text x="218.6" y="218.6" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">11</text>
+  <text x="166.8" y="308.2" fill="rgba(240,235,224,0.40)" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">12</text>
+  <line x1="268.0" y1="360.0" x2="108.0" y2="360.0" stroke="#f0ebe0" stroke-width="1.6" opacity="0.9"/>
+  <line x1="280.3" y1="406.0" x2="141.8" y2="486.0" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <line x1="314.0" y1="439.7" x2="234.0" y2="578.2" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <line x1="360.0" y1="452.0" x2="360.0" y2="612.0" stroke="#f0ebe0" stroke-width="1.6" opacity="0.9"/>
+  <line x1="406.0" y1="439.7" x2="486.0" y2="578.2" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <line x1="439.7" y1="406.0" x2="578.2" y2="486.0" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <line x1="452.0" y1="360.0" x2="612.0" y2="360.0" stroke="#f0ebe0" stroke-width="1.6" opacity="0.9"/>
+  <line x1="439.7" y1="314.0" x2="578.2" y2="234.0" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <line x1="406.0" y1="280.3" x2="486.0" y2="141.8" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <line x1="360.0" y1="268.0" x2="360.0" y2="108.0" stroke="#f0ebe0" stroke-width="1.6" opacity="0.9"/>
+  <line x1="314.0" y1="280.3" x2="234.0" y2="141.8" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <line x1="280.3" y1="314.0" x2="141.8" y2="234.0" stroke="rgba(240,235,224,0.10)" stroke-width="1" opacity="1"/>
+  <text x="2.0" y="360.0" fill="#7B6FE8" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif" letter-spacing="2">ASC</text>
+  <text x="360.0" y="718.0" fill="#7B6FE8" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif" letter-spacing="2">IC</text>
+  <text x="718.0" y="360.0" fill="#7B6FE8" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif" letter-spacing="2">DC</text>
+  <text x="360.0" y="2.0" fill="#7B6FE8" font-size="13" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif" letter-spacing="2">MC</text>
+  <path d="M 28.00 360.00 A 332 332 0 0 0 72.48 526.00 L 103.66 508.00 A 296 296 0 0 1 64.00 360.00 Z" fill="#4FC3F7" stroke="none" opacity="0.45"/>
+  <text x="196.2" y="474.7" fill="#f0ebe0" font-size="24" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif">☉</text>
+  <text x="214.2" y="462.1" fill="rgba(240,235,224,0.40)" font-size="10" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">05°</text>
+  <text x="401.6" y="555.6" fill="#f0ebe0" font-size="24" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif">☾</text>
+  <text x="397.0" y="534.1" fill="rgba(240,235,224,0.40)" font-size="10" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">12°</text>
+  <text x="174.6" y="434.9" fill="#f0ebe0" font-size="24" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif">☿</text>
+  <text x="195.0" y="426.7" fill="rgba(240,235,224,0.40)" font-size="10" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">22°</text>
+  <text x="263.0" y="534.9" fill="#f0ebe0" font-size="24" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif">♂</text>
+  <text x="273.7" y="515.7" fill="rgba(240,235,224,0.40)" font-size="10" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">01°</text>
+  <text x="160.1" y="353.0" fill="#f0ebe0" font-size="24" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif">♀</text>
+  <text x="182.1" y="353.8" fill="rgba(240,235,224,0.40)" font-size="10" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif">28°</text>
+  <text x="360.0" y="354.0" fill="#f0ebe0" font-size="16" text-anchor="middle" dominant-baseline="central" font-family="Lora, serif" font-style="italic">Gemini Rising</text>
+  <text x="360.0" y="378.0" fill="rgba(240,235,224,0.70)" font-size="11" text-anchor="middle" dominant-baseline="central" font-family="Questrial, sans-serif" letter-spacing="1.5">Versatility · communication · networks</text>
+  <line x1="264.0" y1="360.0" x2="10.0" y2="360.0" stroke="#FFD54F" stroke-width="3" opacity="0.85" filter="url(#glow)"/>
+</svg>
+          <span class="hint">
+            <span>Click the chart for the reading</span>
+            <span class="ico">+</span>
+          </span>
+        </button>
+
+        <div class="reading">
+          <div class="placeholder" id="ph-car-3">
+            <span class="ico">✶</span><br>
+            Click the image on the left to reveal the reading.
+          </div>
+          <div class="reading-content" id="rd-car-3">
+            <h4>Example — Gemini Rising</h4>
+            <p><strong>Gemini Rising</strong> expresses through <em>intellect, communication,</em> and <em>adaptability</em>. This person relies on <strong>quick thinking</strong> and the ability to process and share information rapidly.</p>
+            <p>They thrive in areas like <em>media, sales, writing, teaching, marketing</em> — anything connected to communication and information flow. Their strength is versatility, networking, and connecting ideas to ideas, and people to people.</p>
+            <p>The shadow: scattering. Ten browser tabs, three side-projects, no finished one. The growth path is <em>which</em> conversation to commit to — narrowing, not broadening.</p>
+            <p><strong>Reading rule:</strong> match the Ascendant's element to the daily texture of the work. Air → people, words, ideas. Earth → tangible outputs. Fire → motion, novelty. Water → people's emotional states.</p>
+            <div class="tags">
+              <span class="tag">Gemini Rising</span>
+              <span class="tag">Versatility</span>
+              <span class="tag">Communication-driven</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="practice">
+        <span class="p-eyebrow">★ Try it on your own chart</span>
+        <p>Look at your Ascendant sign and ask:</p>
+        <ul>
+          <li>What's the <em>texture</em> of how you work? Quick + verbal? Slow + tangible? Big-picture + restless?</li>
+          <li>Does your current role match that texture, or does it fight it?</li>
+          <li>If your MC is the <em>destination</em>, your Ascendant is the <em>vehicle</em> — are they compatible, or are you driving a tractor toward a sprint finish?</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 4 · SYNTHESIS (Career) -->
+  <section class="step synth" id="car-step4">
+    <div class="container">
+      <div class="step-head">
+        <div class="step-num n4">4</div>
+        <div class="text">
+          <span class="eyebrow">▸ Step 4 of 4 — Synthesis</span>
+          <h2>Combine all <em>three</em> for the full picture.</h2>
+          <p class="sub">Always read the layers together. Sun + Moon = what you're <em>good</em> at and what brings <em>satisfaction</em>. Midheaven = the <em>direction</em> and the kind of environment. Ascendant = how you <em>act</em> and succeed in real life. Patterns matter more than isolated meanings.</p>
+        </div>
+      </div>
+
+      <div class="synth-grid">
+        <div class="synth-card gold"><div class="name">Sun + Moon</div><p>Talents and satisfaction. Where you want to shine, and what makes work feel meaningful.</p></div>
+        <div class="synth-card coral"><div class="name">Midheaven</div><p>Direction and environment. The vector the career wants to point in, regardless of job title.</p></div>
+        <div class="synth-card cyan"><div class="name">Ascendant</div><p>Method and texture. How you actually do the work — the vehicle that gets you to the MC.</p></div>
+        <div class="synth-card magenta"><div class="name">Together</div><p>The full reading: a person who builds <em>this kind</em> of thing, in <em>this kind</em> of environment, using <em>this kind</em> of approach.</p></div>
+      </div>
+
+      <div class="tip-card">
+        <span class="t-eyebrow">★ Reading rule</span>
+        <p><strong>Focus on patterns, not isolated placements.</strong> If three of the four placements emphasize the same element, that's the headline. If they conflict, that conflict <em>is</em> the story — and the person's career growth usually involves negotiating it consciously rather than picking a side.</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- INTERACTIVE CHART CALCULATOR -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<section class="chart-tool" id="chartTool">
+  <div class="container">
+    <span class="eyebrow">▸ Bonus tool · build your own</span>
+    <h2>Now plug in <em>real birth data</em>.</h2>
+    <p class="tool-lead">A working calculator with the same engine professional tools use. Enter date, time, and place — get accurate planet positions, houses, aspects, and current transits. Use it on yourself, friends, family. The more charts you read, the faster the algorithm becomes second nature.</p>
+
+    <div class="ct-grid">
+      <!-- LEFT: input form -->
+      <div class="ct-form">
+        <h3>Birth data</h3>
+        <div class="ct-field">
+          <label>Date</label>
+          <input type="date" id="ct-date" value="1990-07-15" min="1900-01-01" max="2100-12-31">
+        </div>
+        <div class="ct-field">
+          <label>Time (local, 24h)</label>
+          <input type="time" id="ct-time" value="12:00" step="60">
+          <small>Use 12:00 if exact time is unknown — Sun, Moon, planets remain accurate; ASC/houses become approximate.</small>
+        </div>
+        <div class="ct-field">
+          <label>Location</label>
+          <select id="ct-city">
+            <option value="kyiv">Kyiv (50.45°N, 30.52°E)</option>
+            <option value="lviv">Lviv (49.84°N, 24.03°E)</option>
+            <option value="kharkiv">Kharkiv (49.99°N, 36.23°E)</option>
+            <option value="odesa">Odesa (46.48°N, 30.72°E)</option>
+            <option value="dnipro">Dnipro (48.46°N, 35.05°E)</option>
+            <option value="warsaw">Warsaw (52.23°N, 21.01°E)</option>
+            <option value="berlin">Berlin (52.52°N, 13.40°E)</option>
+            <option value="london">London (51.51°N, 0°)</option>
+            <option value="paris">Paris (48.86°N, 2.35°E)</option>
+            <option value="newyork">New York (40.71°N, 74.01°W)</option>
+            <option value="losangeles">Los Angeles (34.05°N, 118.24°W)</option>
+            <option value="moscow">Moscow (55.76°N, 37.62°E)</option>
+            <option value="istanbul">Istanbul (41.01°N, 28.98°E)</option>
+            <option value="tokyo">Tokyo (35.69°N, 139.69°E)</option>
+            <option value="sydney">Sydney (33.87°S, 151.21°E)</option>
+            <option value="custom">Custom…</option>
+          </select>
+        </div>
+        <div class="ct-field" id="ct-customRow" style="display:none">
+          <label>Latitude (deg, North = +)</label>
+          <input type="number" id="ct-lat" step="0.001" value="50.45" min="-89" max="89">
+          <label style="margin-top:10px">Longitude (deg, East = +)</label>
+          <input type="number" id="ct-lon" step="0.001" value="30.52" min="-180" max="180">
+        </div>
+        <div class="ct-field">
+          <label>Time zone (UTC offset)</label>
+          <select id="ct-tz">
+            <option value="auto">Auto (from city)</option>
+            <option value="0">UTC (+0)</option>
+            <option value="1">UTC+1 (CET)</option>
+            <option value="2">UTC+2 (EET · Kyiv winter)</option>
+            <option value="3">UTC+3 (EEST · Kyiv summer / MSK)</option>
+            <option value="-5">UTC−5 (EST)</option>
+            <option value="-4">UTC−4 (EDT)</option>
+            <option value="-8">UTC−8 (PST)</option>
+            <option value="-7">UTC−7 (PDT)</option>
+            <option value="9">UTC+9 (JST)</option>
+            <option value="10">UTC+10 (Sydney winter)</option>
+            <option value="11">UTC+11 (Sydney summer)</option>
+          </select>
+          <small>If unsure for Ukraine — use +2 (winter / DST off) or +3 (summer / DST on).</small>
+        </div>
+
+        <div class="ct-divider"></div>
+
+        <h3>Display</h3>
+        <div class="ct-field">
+          <label>House system</label>
+          <div class="ct-toggle" id="ct-houses">
+            <button data-houses="whole" class="active">Whole Sign</button>
+            <button data-houses="placidus">Placidus</button>
+          </div>
+          <small>Whole Sign = sign-aligned, modern · Placidus = quadrant, matches astro.com.</small>
+        </div>
+        <div class="ct-field">
+          <label class="ct-check"><input type="checkbox" id="ct-aspects" checked> Show aspect lines</label>
+        </div>
+        <div class="ct-field">
+          <label class="ct-check"><input type="checkbox" id="ct-transits"> Overlay current transits</label>
+          <input type="date" id="ct-transitDate" style="margin-top:8px;display:none">
+          <small id="ct-transitNote" style="display:none">Outer ring = transiting planets right now (or chosen date).</small>
+        </div>
+
+        <button id="ct-go" class="btn primary" type="button">Compute chart →</button>
+        <div id="ct-error" class="ct-error" style="display:none;margin-top:12px"></div>
+      </div>
+
+      <!-- RIGHT: output -->
+      <div class="ct-output">
+        <div class="ct-chart-wrap empty" id="ct-chartWrap">
+          <div class="ct-empty">
+            <span class="ico">⨁</span>
+            <p>Fill in the birth data and click <strong>Compute chart</strong>. The wheel renders with planets, houses, and aspects.</p>
+          </div>
+        </div>
+        <div id="ct-summaryWrap" style="display:none">
+          <div class="ct-summary">
+            <div class="meta" id="ct-meta"></div>
+          </div>
+        </div>
+        <div class="ct-tables" id="ct-tables" style="display:none">
+          <div class="ct-tbl">
+            <h4>Placements</h4>
+            <table>
+              <thead><tr><th></th><th>Planet</th><th>Position</th><th style="text-align:right">House</th></tr></thead>
+              <tbody id="ct-placements"></tbody>
+            </table>
+          </div>
+          <div class="ct-tbl">
+            <h4 id="ct-aspectsTitle">Aspects</h4>
+            <ul id="ct-aspectList"></ul>
+          </div>
+        </div>
+        <div class="ct-prompt" id="ct-promptCard" style="display:none">
+          <span class="p-eyebrow">Self-practice</span>
+          <p id="ct-promptText"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- OUTRO -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<section class="outro" id="outro">
+  <div class="container">
+    <span class="eyebrow">▸ Module complete</span>
+    <h2>The chart turned into a <em>conversation</em>.</h2>
+    <p>That's the whole craft of mini chart reading: take cosmic symbols, read them in sequence, and give someone something practical to take home. With practice, you'll start recognising recurring motifs across charts — and the algorithm becomes second nature.</p>
+    <div class="outro-buttons">
+      <button class="btn primary" id="switchTrackBtn">Switch to other track →</button>
+      <a class="btn" href="#chooseTrack">Back to start ↑</a>
+    </div>
+  </div>
+</section>
+
+<!-- FLOATING FULLSCREEN BUTTON -->
+<button class="fs-btn" id="fsBtn" aria-label="Toggle fullscreen">
+  <svg id="fsIcon" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+  <span class="tip" id="fsTip">Fullscreen</span>
+</button>
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- ASTRONOMY ENGINE (cosinekitty/astronomy, MIT) — for accurate planet positions -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<script src="astronomy.min.js"></script>
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- INTERACTIVE CHART ENGINE -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<script>
+(function(){
+  if (typeof Astronomy === 'undefined') {
+    document.getElementById('ct-error').style.display = 'block';
+    document.getElementById('ct-error').textContent = 'Astronomy library failed to load. Make sure astronomy.min.js sits next to index.html.';
+    return;
+  }
+
+  // ───── constants ─────
+  const ZODIAC = ['Aries','Taurus','Gemini','Cancer','Leo','Virgo','Libra','Scorpio','Sagittarius','Capricorn','Aquarius','Pisces'];
+  const ZODIAC_SHORT = ['Ari','Tau','Gem','Can','Leo','Vir','Lib','Sco','Sag','Cap','Aqu','Pis'];
+  const ZODIAC_GLYPH = ['♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓'];
+  const ELEMENT_OF = ['fire','earth','air','water','fire','earth','air','water','fire','earth','air','water'];
+  const ELEMENT_COLOR = {fire:'#E8604C', earth:'#6FFFB0', air:'#4FC3F7', water:'#E040FB'};
+
+  const PLANET_ORDER = ['Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn','Uranus','Neptune','Pluto'];
+  const PLANET = {
+    Sun:     {glyph:'☉', color:'#FFD54F', label:'Sun'},
+    Moon:    {glyph:'☾', color:'#f0ebe0', label:'Moon'},
+    Mercury: {glyph:'☿', color:'#4FC3F7', label:'Mercury'},
+    Venus:   {glyph:'♀', color:'#6FFFB0', label:'Venus'},
+    Mars:    {glyph:'♂', color:'#E8604C', label:'Mars'},
+    Jupiter: {glyph:'♃', color:'#7B6FE8', label:'Jupiter'},
+    Saturn:  {glyph:'♄', color:'#cdb990', label:'Saturn'},
+    Uranus:  {glyph:'♅', color:'#80DEEA', label:'Uranus'},
+    Neptune: {glyph:'♆', color:'#E040FB', label:'Neptune'},
+    Pluto:   {glyph:'♇', color:'#E8604C', label:'Pluto'},
+  };
+
+  const CITIES = {
+    kyiv:        {lat:50.4501, lon:30.5234, tz:'2',  name:'Kyiv'},
+    lviv:        {lat:49.8397, lon:24.0297, tz:'2',  name:'Lviv'},
+    kharkiv:     {lat:49.9935, lon:36.2304, tz:'2',  name:'Kharkiv'},
+    odesa:       {lat:46.4825, lon:30.7233, tz:'2',  name:'Odesa'},
+    dnipro:      {lat:48.4647, lon:35.0462, tz:'2',  name:'Dnipro'},
+    warsaw:      {lat:52.2297, lon:21.0122, tz:'1',  name:'Warsaw'},
+    berlin:      {lat:52.5200, lon:13.4050, tz:'1',  name:'Berlin'},
+    london:      {lat:51.5074, lon:-0.1278, tz:'0',  name:'London'},
+    paris:       {lat:48.8566, lon:2.3522,  tz:'1',  name:'Paris'},
+    newyork:     {lat:40.7128, lon:-74.0060,tz:'-5', name:'New York'},
+    losangeles:  {lat:34.0522, lon:-118.2437,tz:'-8',name:'Los Angeles'},
+    moscow:      {lat:55.7558, lon:37.6173, tz:'3',  name:'Moscow'},
+    istanbul:    {lat:41.0082, lon:28.9784, tz:'3',  name:'Istanbul'},
+    tokyo:       {lat:35.6762, lon:139.6503,tz:'9',  name:'Tokyo'},
+    sydney:      {lat:-33.8688,lon:151.2093,tz:'10', name:'Sydney'},
+  };
+
+  const ASPECT_TYPES = [
+    {name:'Conjunction', angle:0,   orb:8, sym:'☌', cls:'asp-conj'},
+    {name:'Sextile',     angle:60,  orb:4, sym:'⚹', cls:'asp-sext'},
+    {name:'Square',      angle:90,  orb:6, sym:'□', cls:'asp-sq'},
+    {name:'Trine',       angle:120, orb:6, sym:'△', cls:'asp-tri'},
+    {name:'Opposition',  angle:180, orb:8, sym:'☍', cls:'asp-opp'},
+  ];
+
+  // ───── math helpers ─────
+  const D2R = Math.PI/180, R2D = 180/Math.PI;
+  const norm360 = x => ((x % 360) + 360) % 360;
+  const wrap180 = x => { let d = ((x + 180) % 360 + 360) % 360 - 180; return d; };
+
+  function meanObliquity(jd){
+    const T = (jd - 2451545.0)/36525;
+    const sec = 84381.406 - 46.836769*T - 0.0001831*T*T + 0.00200340*T*T*T;
+    return sec/3600;
+  }
+
+  function lonToRADec(lonDeg, oblDeg){
+    const ε = oblDeg*D2R, λ = lonDeg*D2R;
+    const δ = Math.asin(Math.sin(ε)*Math.sin(λ));
+    let α = Math.atan2(Math.sin(λ)*Math.cos(ε), Math.cos(λ));
+    α = (α + 2*Math.PI) % (2*Math.PI);
+    return {ra:α, dec:δ};
+  }
+
+  function computeAscMc(ramcDeg, latDeg, oblDeg){
+    const r = ramcDeg*D2R, φ = latDeg*D2R, ε = oblDeg*D2R;
+
+    // MC: ecliptic longitude where ecliptic crosses meridian
+    let mc = Math.atan2(Math.sin(r), Math.cos(r)*Math.cos(ε));
+    mc = norm360(mc * R2D);
+
+    // ASC: tan formula via atan2 — but the principal value can be the descendant.
+    // Resolve by checking that ASC's right ascension equals RAMC + 90° (eastern horizon).
+    let asc = Math.atan2(-Math.cos(r), Math.sin(ε)*Math.tan(φ) + Math.cos(ε)*Math.sin(r));
+    asc = norm360(asc * R2D);
+
+    // Verify: RA(asc) should equal RAMC+90° (mod 360). If not, flip by 180°.
+    const ascRA = lonToRADec(asc, oblDeg).ra * R2D;
+    const expectedRA = norm360(ramcDeg + 90);
+    let diff = norm360(ascRA - expectedRA);
+    if (diff > 180) diff = 360 - diff;
+    if (diff > 90) asc = (asc + 180) % 360;
+
+    return {asc, mc};
+  }
+
+  function wholeSignHouses(asc){
+    const start = Math.floor(asc/30)*30;
+    return Array.from({length:12}, (_,i) => (start + i*30) % 360);
+  }
+
+  function placidusHouses(ramcDeg, latDeg, oblDeg, asc, mc){
+    const ramc = ramcDeg*D2R, φ = latDeg*D2R, ε = oblDeg*D2R;
+
+    function semiArc(δ){
+      const x = -Math.tan(φ)*Math.tan(δ);
+      if (x > 1 || x < -1) return null;
+      return Math.acos(x);
+    }
+
+    function solveCusp(houseNum){
+      const above = (houseNum === 11 || houseNum === 12);
+      let lonDeg = above ? mc + (houseNum-10)*30 : asc + (houseNum-1)*30;
+      lonDeg = norm360(lonDeg);
+      let prev = -999;
+      for (let iter=0; iter<60; iter++){
+        const {ra, dec} = lonToRADec(lonDeg, oblDeg);
+        const SD = semiArc(dec);
+        if (SD === null) return null;
+        let targetH;
+        if (above){
+          const F = (houseNum - 10)/3;
+          targetH = -F*SD;
+        } else {
+          const f = (houseNum === 2) ? 2/3 : 1/3;
+          targetH = Math.PI + f*(Math.PI - SD);
+        }
+        let targetα = ramc - targetH;
+        targetα = ((targetα % (2*Math.PI)) + 2*Math.PI) % (2*Math.PI);
+        const a = Math.atan2(Math.sin(targetα), Math.cos(targetα)*Math.cos(ε));
+        const c1 = norm360(a*R2D);
+        const c2 = (c1 + 180) % 360;
+        const d1 = Math.abs(wrap180(c1 - lonDeg));
+        const d2 = Math.abs(wrap180(c2 - lonDeg));
+        const newLon = d1 < d2 ? c1 : c2;
+        const change = Math.abs(wrap180(newLon - lonDeg));
+        if (change < 1e-7) return newLon;
+        if (Math.abs(newLon - prev) < 1e-7) return newLon;
+        prev = lonDeg;
+        lonDeg = newLon;
+      }
+      return lonDeg;
+    }
+
+    const cusps = new Array(12);
+    cusps[0] = asc;
+    cusps[3] = (mc + 180) % 360;
+    cusps[6] = (asc + 180) % 360;
+    cusps[9] = mc;
+    cusps[10] = solveCusp(11) ?? cusps[9];
+    cusps[11] = solveCusp(12) ?? cusps[0];
+    cusps[1]  = solveCusp(2)  ?? cusps[0];
+    cusps[2]  = solveCusp(3)  ?? cusps[3];
+    cusps[4] = (cusps[10] + 180) % 360;
+    cusps[5] = (cusps[11] + 180) % 360;
+    cusps[7] = (cusps[1]  + 180) % 360;
+    cusps[8] = (cusps[2]  + 180) % 360;
+    return cusps;
+  }
+
+  function planetHouse(longitude, cusps){
+    for (let i=0; i<12; i++){
+      const start = cusps[i];
+      const end = cusps[(i+1)%12];
+      let span = (end - start + 360) % 360;
+      if (span === 0) span = 30;
+      const pos = (longitude - start + 360) % 360;
+      if (pos >= 0 && pos < span) return i+1;
+    }
+    return 1;
+  }
+
+  function computeAspects(planets){
+    const list = [];
+    const names = Object.keys(planets);
+    for (let i=0; i<names.length; i++){
+      for (let j=i+1; j<names.length; j++){
+        const a = planets[names[i]].longitude;
+        const b = planets[names[j]].longitude;
+        let d = Math.abs(a - b);
+        if (d > 180) d = 360 - d;
+        for (const t of ASPECT_TYPES){
+          const orb = Math.abs(d - t.angle);
+          if (orb <= t.orb){
+            list.push({a:names[i], b:names[j], type:t.name, sym:t.sym, cls:t.cls, orb});
+            break;
+          }
+        }
+      }
+    }
+    list.sort((x,y) => x.orb - y.orb);
+    return list;
+  }
+
+  function computePlanetsAt(astroTime){
+    const out = {};
+    for (const n of PLANET_ORDER){
+      const v = Astronomy.GeoVector(Astronomy.Body[n], astroTime, true);
+      const e = Astronomy.Ecliptic(v);
+      out[n] = {longitude: norm360(e.elon), latitude: e.elat};
+    }
+    return out;
+  }
+
+  function computeChart(opts){
+    const {dateStr, timeStr, tzOffset, lat, lon, system} = opts;
+    const [y,m,d] = dateStr.split('-').map(Number);
+    const [hh,mm] = timeStr.split(':').map(Number);
+    const localMs = Date.UTC(y, m-1, d, hh, mm);
+    const utcMs = localMs - tzOffset*3600*1000;
+    const utcDate = new Date(utcMs);
+    const t = Astronomy.MakeTime(utcDate);
+    const jd = t.tt + 2451545.0;
+    const obl = meanObliquity(jd);
+    const gmstHrs = Astronomy.SiderealTime(t);
+    const lstHrs = ((gmstHrs + lon/15) % 24 + 24) % 24;
+    const ramcDeg = norm360(lstHrs * 15);
+    const {asc, mc} = computeAscMc(ramcDeg, lat, obl);
+    const planets = computePlanetsAt(t);
+    const houses = (system === 'placidus')
+      ? placidusHouses(ramcDeg, lat, obl, asc, mc)
+      : wholeSignHouses(asc);
+    for (const n of PLANET_ORDER) planets[n].house = planetHouse(planets[n].longitude, houses);
+    const aspects = computeAspects(planets);
+    return {utcDate, jd, obl, ramc:ramcDeg, asc, mc, planets, houses, aspects, system};
+  }
+
+  function fmtDeg(longitude){
+    const sign = Math.floor(longitude/30);
+    const d = longitude - sign*30;
+    const deg = Math.floor(d);
+    const min = Math.floor((d - deg)*60);
+    return {sign, deg, min, glyph: ZODIAC_GLYPH[sign], short: ZODIAC_SHORT[sign], full: ZODIAC[sign]};
+  }
+  function fmtPos(longitude){
+    const f = fmtDeg(longitude);
+    return `${f.glyph} ${f.deg}°${String(f.min).padStart(2,'0')}′ ${f.short}`;
+  }
+
+  // ───── SVG renderer ─────
+  function renderChart(chart, transitChart, opts){
+    const {asc, mc, planets, houses, aspects} = chart;
+    const W = 720;
+    const CX = 360, CY = 360;
+    const R_OUTER = 332;
+    const R_ZODIAC = 296;
+    const R_HOUSE = 252;
+    const R_INNER = 92;
+    const R_PLANET = 200;
+    const R_PLANET_2 = 168;
+    const R_TRANSIT = R_OUTER + 20;
+
+    // ASC fixed at 9 o'clock (math-angle 180°). Going CCW (math angle increasing) =
+    // moving forward in zodiac longitude.
+    function angle(longitude){
+      const rel = norm360(longitude - asc);
+      return ((180 + rel) % 360) * D2R;
+    }
+    function pt(lon, r){
+      const a = angle(lon);
+      return [CX + r*Math.cos(a), CY - r*Math.sin(a)];
+    }
+
+    const parts = [];
+    parts.push(`<svg viewBox="0 0 ${W} ${W}" xmlns="http://www.w3.org/2000/svg" class="natal-svg" aria-label="Natal chart">`);
+    parts.push(`<defs><style>
+      .ring-soft{fill:none;stroke:rgba(240,235,224,0.18);stroke-width:1}
+      .ring-mid{fill:none;stroke:rgba(240,235,224,0.40);stroke-width:1.2}
+      .ring-strong{fill:none;stroke:rgba(240,235,224,0.65);stroke-width:1.4}
+      .axis{stroke:rgba(240,235,224,0.55);stroke-width:1.4;stroke-dasharray:4 5}
+      .house-line{stroke:rgba(240,235,224,0.30);stroke-width:1}
+      .sign-line{stroke:rgba(240,235,224,0.18);stroke-width:1}
+      .axis-label{fill:#f0ebe0;font-family:'Lora',serif;font-style:italic;font-size:13px;text-anchor:middle;dominant-baseline:central;letter-spacing:0.04em}
+      .house-num{fill:rgba(240,235,224,0.55);font-family:'Questrial',sans-serif;font-size:11px;text-anchor:middle;dominant-baseline:central}
+      .sign-glyph{font-family:'Apple Symbols','Segoe UI Symbol','Symbola','DejaVu Sans',serif;font-size:20px;text-anchor:middle;dominant-baseline:central}
+      .planet-glyph{font-family:'Apple Symbols','Segoe UI Symbol','Symbola','DejaVu Sans',serif;font-size:19px;text-anchor:middle;dominant-baseline:central}
+      .planet-glyph.transit{font-size:14px;opacity:0.85}
+      .planet-deg{fill:rgba(240,235,224,0.65);font-family:'Questrial',sans-serif;font-size:9px;text-anchor:middle;dominant-baseline:central}
+      .aspect{stroke-width:0.9;fill:none;opacity:0.7}
+      .asp-conj{stroke:#FFD54F}
+      .asp-sext{stroke:#4FC3F7}
+      .asp-sq{stroke:#E8604C}
+      .asp-tri{stroke:#6FFFB0}
+      .asp-opp{stroke:#E040FB}
+      .deg-tick{stroke:rgba(240,235,224,0.30);stroke-width:0.6}
+      .deg-tick-5{stroke:rgba(240,235,224,0.55);stroke-width:0.9}
+    </style></defs>`);
+
+    parts.push(`<rect width="${W}" height="${W}" fill="#0c1118"/>`);
+
+    // 12 sign sectors with element coloring
+    for (let s=0; s<12; s++){
+      const lon0 = s*30;
+      const lon1 = (s+1)*30;
+      const a0 = angle(lon0);
+      const a1 = angle(lon1);
+      const p0o = [CX + R_ZODIAC*Math.cos(a0), CY - R_ZODIAC*Math.sin(a0)];
+      const p1o = [CX + R_ZODIAC*Math.cos(a1), CY - R_ZODIAC*Math.sin(a1)];
+      const p1i = [CX + R_HOUSE*Math.cos(a1),  CY - R_HOUSE*Math.sin(a1)];
+      const p0i = [CX + R_HOUSE*Math.cos(a0),  CY - R_HOUSE*Math.sin(a0)];
+      const color = ELEMENT_COLOR[ELEMENT_OF[s]];
+      // Math-angle increases (CCW) from a0 to a1 by exactly 30°.
+      // SVG: y-flipped, so math-CCW = visual-CW. sweep-flag=0 means CW in SVG = CCW in math.
+      // From p0o to p1o along outer arc (math-CCW): sweep=0; from p1i back to p0i along inner arc (math-CW): sweep=1
+      const path = `M ${p0o[0].toFixed(2)} ${p0o[1].toFixed(2)} A ${R_ZODIAC} ${R_ZODIAC} 0 0 0 ${p1o[0].toFixed(2)} ${p1o[1].toFixed(2)} L ${p1i[0].toFixed(2)} ${p1i[1].toFixed(2)} A ${R_HOUSE} ${R_HOUSE} 0 0 1 ${p0i[0].toFixed(2)} ${p0i[1].toFixed(2)} Z`;
+      parts.push(`<path d="${path}" fill="${color}" opacity="0.10"/>`);
+
+      // Sign glyph in middle of sector
+      const mid = pt(s*30 + 15, (R_ZODIAC + R_HOUSE)/2);
+      parts.push(`<text class="sign-glyph" x="${mid[0].toFixed(1)}" y="${mid[1].toFixed(1)}" fill="${color}" opacity="0.95">${ZODIAC_GLYPH[s]}</text>`);
+
+      // Sign boundary line
+      const eo = pt(s*30, R_ZODIAC);
+      const ei = pt(s*30, R_HOUSE);
+      parts.push(`<line class="sign-line" x1="${eo[0].toFixed(1)}" y1="${eo[1].toFixed(1)}" x2="${ei[0].toFixed(1)}" y2="${ei[1].toFixed(1)}"/>`);
+
+      // 1° tick marks just inside zodiac ring
+      for (let k=1; k<30; k++){
+        const tk = pt(s*30 + k, R_ZODIAC);
+        const ti = pt(s*30 + k, R_ZODIAC - (k%5===0 ? 7 : 4));
+        const cls = k%5===0 ? 'deg-tick-5' : 'deg-tick';
+        parts.push(`<line class="${cls}" x1="${tk[0].toFixed(1)}" y1="${tk[1].toFixed(1)}" x2="${ti[0].toFixed(1)}" y2="${ti[1].toFixed(1)}"/>`);
+      }
+    }
+
+    // Rings
+    parts.push(`<circle class="ring-strong" cx="${CX}" cy="${CY}" r="${R_OUTER}"/>`);
+    parts.push(`<circle class="ring-mid"    cx="${CX}" cy="${CY}" r="${R_ZODIAC}"/>`);
+    parts.push(`<circle class="ring-mid"    cx="${CX}" cy="${CY}" r="${R_HOUSE}"/>`);
+    parts.push(`<circle class="ring-soft"   cx="${CX}" cy="${CY}" r="${R_INNER}"/>`);
+
+    // House cusps + numbers
+    for (let h=0; h<12; h++){
+      const cusp = houses[h];
+      const isAxis = (h % 3 === 0); // 1, 4, 7, 10
+      const o = pt(cusp, R_HOUSE);
+      if (isAxis){
+        const o2 = pt((cusp+180)%360, R_HOUSE);
+        parts.push(`<line class="axis" x1="${o[0].toFixed(1)}" y1="${o[1].toFixed(1)}" x2="${o2[0].toFixed(1)}" y2="${o2[1].toFixed(1)}"/>`);
+      } else {
+        const i = pt(cusp, R_INNER);
+        parts.push(`<line class="house-line" x1="${o[0].toFixed(1)}" y1="${o[1].toFixed(1)}" x2="${i[0].toFixed(1)}" y2="${i[1].toFixed(1)}"/>`);
+      }
+
+      // House number — placed in middle of house arc, just inside cusp ring
+      const next = houses[(h+1)%12];
+      let span = (next - cusp + 360) % 360;
+      if (span === 0) span = 30;
+      const numLon = (cusp + span/2) % 360;
+      const np = pt(numLon, R_INNER + 22);
+      parts.push(`<text class="house-num" x="${np[0].toFixed(1)}" y="${np[1].toFixed(1)}">${h+1}</text>`);
+    }
+
+    // Axis labels (ASC, IC, DSC, MC) — outside outer ring at axis longitudes
+    const axes = [
+      {lon: asc, txt: 'ASC'},
+      {lon: (asc+180)%360, txt: 'DSC'},
+      {lon: mc, txt: 'MC'},
+      {lon: (mc+180)%360, txt: 'IC'},
+    ];
+    for (const ax of axes){
+      const p = pt(ax.lon, R_OUTER + 16);
+      parts.push(`<text class="axis-label" x="${p[0].toFixed(1)}" y="${p[1].toFixed(1)}">${ax.txt}</text>`);
+    }
+
+    // Aspect lines (in inner circle)
+    if (opts.showAspects){
+      for (const asp of aspects){
+        const a = planets[asp.a].longitude;
+        const b = planets[asp.b].longitude;
+        const pa = pt(a, R_INNER);
+        const pb = pt(b, R_INNER);
+        parts.push(`<line class="aspect ${asp.cls}" x1="${pa[0].toFixed(1)}" y1="${pa[1].toFixed(1)}" x2="${pb[0].toFixed(1)}" y2="${pb[1].toFixed(1)}"/>`);
+      }
+    }
+
+    // Planet placement with overlap resolution (stagger radius if within 6°)
+    const sorted = PLANET_ORDER.map(n => ({name:n, lon: planets[n].longitude}))
+      .sort((a,b) => a.lon - b.lon);
+    for (let i=0; i<sorted.length; i++){
+      sorted[i].r = R_PLANET;
+      if (i > 0){
+        const prev = sorted[i-1];
+        let d = sorted[i].lon - prev.lon;
+        if (d < 6) sorted[i].r = (prev.r === R_PLANET ? R_PLANET_2 : R_PLANET);
+      }
+    }
+    for (const p of sorted){
+      const info = PLANET[p.name];
+      const tk = pt(p.lon, R_HOUSE);
+      const ti = pt(p.lon, R_HOUSE - 8);
+      parts.push(`<line stroke="${info.color}" stroke-width="1.6" stroke-linecap="round" x1="${tk[0].toFixed(1)}" y1="${tk[1].toFixed(1)}" x2="${ti[0].toFixed(1)}" y2="${ti[1].toFixed(1)}"/>`);
+      const gp = pt(p.lon, p.r);
+      parts.push(`<text class="planet-glyph" x="${gp[0].toFixed(1)}" y="${gp[1].toFixed(1)}" fill="${info.color}">${info.glyph}</text>`);
+      const f = fmtDeg(p.lon);
+      const dp = pt(p.lon, p.r - 18);
+      parts.push(`<text class="planet-deg" x="${dp[0].toFixed(1)}" y="${dp[1].toFixed(1)}">${f.deg}°</text>`);
+    }
+
+    // Transit overlay
+    if (transitChart){
+      const tSorted = PLANET_ORDER.map(n => ({name:n, lon: transitChart.planets[n].longitude}))
+        .sort((a,b)=>a.lon-b.lon);
+      for (let i=0; i<tSorted.length; i++){
+        tSorted[i].r = R_TRANSIT;
+        if (i > 0){
+          const prev = tSorted[i-1];
+          let d = tSorted[i].lon - prev.lon;
+          if (d < 7) tSorted[i].r = prev.r === R_TRANSIT ? R_TRANSIT + 18 : R_TRANSIT;
+        }
+      }
+      for (const p of tSorted){
+        const info = PLANET[p.name];
+        const tk = pt(p.lon, R_OUTER);
+        const ti = pt(p.lon, R_OUTER + 5);
+        parts.push(`<line stroke="${info.color}" stroke-width="1.2" opacity="0.85" x1="${tk[0].toFixed(1)}" y1="${tk[1].toFixed(1)}" x2="${ti[0].toFixed(1)}" y2="${ti[1].toFixed(1)}"/>`);
+        const gp = pt(p.lon, p.r);
+        parts.push(`<text class="planet-glyph transit" x="${gp[0].toFixed(1)}" y="${gp[1].toFixed(1)}" fill="${info.color}">${info.glyph}</text>`);
+      }
+    }
+
+    parts.push(`</svg>`);
+    return parts.join('');
+  }
+
+  // ───── UI wiring ─────
+  const $ = id => document.getElementById(id);
+  const E_DATE = $('ct-date'), E_TIME = $('ct-time'), E_CITY = $('ct-city'), E_TZ = $('ct-tz');
+  const E_LAT = $('ct-lat'), E_LON = $('ct-lon'), E_CUSTOM = $('ct-customRow');
+  const E_HOUSES = $('ct-houses'), E_ASPECTS = $('ct-aspects');
+  const E_TRANSITS = $('ct-transits'), E_TRANSITDATE = $('ct-transitDate'), E_TRANSITNOTE = $('ct-transitNote');
+  const E_GO = $('ct-go'), E_ERROR = $('ct-error');
+  const E_WRAP = $('ct-chartWrap'), E_TABLES = $('ct-tables');
+  const E_PLACE = $('ct-placements'), E_ASPLIST = $('ct-aspectList'), E_ASPTITLE = $('ct-aspectsTitle');
+  const E_SUMMARY = $('ct-summaryWrap'), E_META = $('ct-meta');
+  const E_PROMPT = $('ct-promptCard'), E_PROMPTTXT = $('ct-promptText');
+
+  let houseSystem = 'whole';
+
+  // city → lat/lon/tz autofill
+  E_CITY.addEventListener('change', () => {
+    const v = E_CITY.value;
+    if (v === 'custom'){
+      E_CUSTOM.style.display = 'block';
+    } else {
+      E_CUSTOM.style.display = 'none';
+      const c = CITIES[v];
+      if (c){
+        E_LAT.value = c.lat;
+        E_LON.value = c.lon;
+        if (E_TZ.value === 'auto') {
+          // leave as auto — resolved at compute time
+        }
+      }
+    }
+  });
+
+  // house system toggle
+  E_HOUSES.querySelectorAll('button').forEach(b => {
+    b.addEventListener('click', () => {
+      houseSystem = b.dataset.houses;
+      E_HOUSES.querySelectorAll('button').forEach(x => x.classList.toggle('active', x === b));
+    });
+  });
+
+  // transit checkbox
+  E_TRANSITS.addEventListener('change', () => {
+    const on = E_TRANSITS.checked;
+    E_TRANSITDATE.style.display = on ? 'block' : 'none';
+    E_TRANSITNOTE.style.display = on ? 'block' : 'none';
+    if (on && !E_TRANSITDATE.value){
+      const today = new Date();
+      E_TRANSITDATE.value = today.toISOString().slice(0,10);
+    }
+  });
+
+  E_GO.addEventListener('click', () => {
+    E_ERROR.style.display = 'none';
+    try {
+      const dateStr = E_DATE.value;
+      const timeStr = E_TIME.value;
+      if (!dateStr || !timeStr) throw new Error('Date and time are required.');
+      let lat, lon, tz;
+      if (E_CITY.value === 'custom'){
+        lat = parseFloat(E_LAT.value);
+        lon = parseFloat(E_LON.value);
+      } else {
+        const c = CITIES[E_CITY.value];
+        lat = c.lat; lon = c.lon;
+      }
+      if (!isFinite(lat) || !isFinite(lon)) throw new Error('Latitude and longitude must be valid numbers.');
+      if (E_TZ.value === 'auto'){
+        tz = E_CITY.value === 'custom' ? 0 : parseFloat(CITIES[E_CITY.value].tz);
+      } else {
+        tz = parseFloat(E_TZ.value);
+      }
+
+      const chart = computeChart({dateStr, timeStr, tzOffset:tz, lat, lon, system:houseSystem});
+
+      let transitChart = null;
+      if (E_TRANSITS.checked){
+        const tDate = E_TRANSITDATE.value || new Date().toISOString().slice(0,10);
+        // Use noon UTC of the chosen date for transit positions
+        transitChart = computeChart({dateStr:tDate, timeStr:'12:00', tzOffset:0, lat, lon, system:houseSystem});
+      }
+
+      const svg = renderChart(chart, transitChart, {showAspects: E_ASPECTS.checked});
+      E_WRAP.classList.remove('empty');
+      E_WRAP.innerHTML = svg;
+
+      // Summary line
+      const cityName = E_CITY.value === 'custom' ? `${lat.toFixed(2)}°,${lon.toFixed(2)}°` : CITIES[E_CITY.value].name;
+      const tzSign = tz >= 0 ? '+' : '';
+      E_META.innerHTML = `
+        <span><strong>${dateStr}</strong> · ${timeStr} (UTC${tzSign}${tz})</span>
+        <span><strong>${cityName}</strong> · ${lat.toFixed(2)}°, ${lon.toFixed(2)}°</span>
+        <span>House system: <strong>${houseSystem === 'placidus' ? 'Placidus' : 'Whole Sign'}</strong></span>
+        <span>UTC: <strong>${chart.utcDate.toISOString().slice(0,16).replace('T',' ')}</strong></span>
+      `;
+      E_SUMMARY.style.display = 'block';
+
+      // Placements table
+      let rows = '';
+      const ascF = fmtDeg(chart.asc);
+      const mcF = fmtDeg(chart.mc);
+      rows += `<tr><td class="glyph" style="color:#7B6FE8">⌃</td><td>Ascendant</td><td class="pos">${ascF.glyph} ${ascF.deg}°${String(ascF.min).padStart(2,'0')}′ ${ascF.short}</td><td class="house">—</td></tr>`;
+      rows += `<tr><td class="glyph" style="color:#7B6FE8">⌄</td><td>Midheaven</td><td class="pos">${mcF.glyph} ${mcF.deg}°${String(mcF.min).padStart(2,'0')}′ ${mcF.short}</td><td class="house">—</td></tr>`;
+      for (const n of PLANET_ORDER){
+        const p = chart.planets[n];
+        const f = fmtDeg(p.longitude);
+        rows += `<tr><td class="glyph" style="color:${PLANET[n].color}">${PLANET[n].glyph}</td><td>${PLANET[n].label}</td><td class="pos">${f.glyph} ${f.deg}°${String(f.min).padStart(2,'0')}′ ${f.short}</td><td class="house">H${p.house}</td></tr>`;
+      }
+      E_PLACE.innerHTML = rows;
+
+      // Aspects list
+      if (chart.aspects.length === 0){
+        E_ASPLIST.innerHTML = `<li class="empty-row">No major aspects within orb</li>`;
+      } else {
+        E_ASPLIST.innerHTML = chart.aspects.map(asp => {
+          const orbDeg = Math.floor(asp.orb);
+          const orbMin = Math.floor((asp.orb - orbDeg)*60);
+          return `<li>
+            <span class="asp-ico ${asp.cls}">${asp.sym}</span>
+            <span class="pl">${PLANET[asp.a].glyph}</span>
+            <span class="pl">${PLANET[asp.b].glyph}</span>
+            <span>${asp.type}</span>
+            <span class="orb">${orbDeg}°${String(orbMin).padStart(2,'0')}′</span>
+          </li>`;
+        }).join('');
+      }
+      E_ASPTITLE.textContent = `Aspects (${chart.aspects.length})`;
+      E_TABLES.style.display = 'grid';
+
+      // Practice prompt
+      const sunSign = ZODIAC[fmtDeg(chart.planets.Sun.longitude).sign];
+      const moonSign = ZODIAC[fmtDeg(chart.planets.Moon.longitude).sign];
+      const ascSign = ZODIAC[fmtDeg(chart.asc).sign];
+      E_PROMPTTXT.innerHTML = `Read this chart in two sentences using the algorithm: <em>"${sunSign} Sun in ${moonSign} Moon energy, presenting through ${ascSign} Rising"</em> — then add the strongest aspect from the list. Don't try to interpret everything; just one focused mini-reading.`;
+      E_PROMPT.style.display = 'block';
+
+    } catch(err){
+      E_ERROR.style.display = 'block';
+      E_ERROR.textContent = '⚠ ' + err.message;
+      console.error(err);
+    }
+  });
+
+  // Pre-fill transit date with today
+  E_TRANSITDATE.value = new Date().toISOString().slice(0,10);
+
+})();
+</script>
+
+<script>
+(function(){
+  // ───── Track switching ─────
+  const chooseSection = document.getElementById('chooseTrack');
+  const switchBar     = document.getElementById('trackSwitch');
+  const switchLabel   = document.getElementById('switchLabel');
+  const progressLabel = document.getElementById('progressLabel');
+  const progressFill  = document.getElementById('progressFill');
+  const cards = document.querySelectorAll('.track-card');
+  const switchBtns = document.querySelectorAll('.switch-btn');
+
+  let activeTrack = null;
+
+  function setTrack(name, scrollTo){
+    activeTrack = name;
+    document.body.classList.add('has-track');
+    document.querySelectorAll('.track-content').forEach(t => {
+      t.classList.toggle('active', t.id === 'track-' + name);
+    });
+    cards.forEach(c => c.classList.toggle('active', c.dataset.track === name));
+    switchBtns.forEach(b => b.classList.toggle('active', b.dataset.go === name));
+    switchBar.classList.add('show');
+    const trackName = name === 'rel' ? 'Relationships' : 'Career';
+    switchLabel.textContent = 'Track: ' + trackName;
+    progressLabel.textContent = trackName + ' track';
+    progressFill.style.width = '25%';
+
+    if (scrollTo) {
+      const target = document.getElementById(name + '-foundation');
+      if (target) {
+        const offset = 110;
+        const top = target.getBoundingClientRect().top + window.pageYOffset - offset;
+        window.scrollTo({top, behavior:'smooth'});
+      }
+    }
+  }
+
+  cards.forEach(c => {
+    c.addEventListener('click', e => { e.preventDefault(); setTrack(c.dataset.track, true); });
+  });
+  switchBtns.forEach(b => {
+    b.addEventListener('click', e => { e.preventDefault(); setTrack(b.dataset.go, true); });
+  });
+
+  // Outro switch button
+  const switchTrackBtn = document.getElementById('switchTrackBtn');
+  if (switchTrackBtn) {
+    switchTrackBtn.addEventListener('click', () => {
+      const next = activeTrack === 'rel' ? 'car' : 'rel';
+      setTrack(next, true);
+    });
+  }
+
+  // ───── Click-to-reveal chart readings ─────
+  document.querySelectorAll('.chart-card').forEach(card => {
+    card.addEventListener('click', e => {
+      e.preventDefault();
+      const id = card.dataset.reveal;
+      const ph = document.getElementById('ph-' + id);
+      const rd = document.getElementById('rd-' + id);
+      if (!rd) return;
+      if (rd.classList.contains('show')) {
+        rd.classList.remove('show');
+        if (ph) ph.style.display = '';
+        card.classList.remove('opened');
+      } else {
+        rd.classList.add('show');
+        if (ph) ph.style.display = 'none';
+        card.classList.add('opened');
+      }
+    });
+  });
+
+  // ───── Scroll progress bar (within active track) ─────
+  function updateProgress(){
+    if (!activeTrack) { progressFill.style.width = '0%'; return; }
+    const track = document.getElementById('track-' + activeTrack);
+    if (!track) return;
+    const rect = track.getBoundingClientRect();
+    const total = track.offsetHeight - window.innerHeight;
+    if (total <= 0) { progressFill.style.width = '100%'; return; }
+    const scrolled = -rect.top;
+    const pct = Math.max(0, Math.min(100, (scrolled / total) * 100));
+    progressFill.style.width = pct + '%';
+  }
+  window.addEventListener('scroll', updateProgress, {passive:true});
+  window.addEventListener('resize', updateProgress);
+
+  // ───── Reveal-on-scroll animation ─────
+  const reveals = document.querySelectorAll('.step, .foundation, .chart-tool, .outro');
+  reveals.forEach(r => r.classList.add('reveal'));
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(en => {
+        if (en.isIntersecting) {
+          en.target.classList.add('in');
+          io.unobserve(en.target);
+        }
+      });
+    }, {rootMargin:'0px 0px -10% 0px', threshold:0.1});
+    reveals.forEach(r => io.observe(r));
+  } else {
+    reveals.forEach(r => r.classList.add('in'));
+  }
+
+  // ───── Fullscreen toggle ─────
+  const fsBtn  = document.getElementById('fsBtn');
+  const fsIcon = document.getElementById('fsIcon');
+  const fsTip  = document.getElementById('fsTip');
+
+  const iconExpand = '<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>';
+  const iconExit   = '<path d="M9 4H4v5M15 4h5v5M9 20H4v-5M15 20h5v-5"/>';
+
+  function isFullscreen(){
+    return !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
+  }
+  function setIcon(){
+    fsIcon.innerHTML = isFullscreen() ? iconExit : iconExpand;
+    fsTip.textContent = isFullscreen() ? 'Exit fullscreen' : 'Fullscreen';
+  }
+  fsBtn.addEventListener('click', () => {
+    if (!isFullscreen()) {
+      const el = document.documentElement;
+      const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+      if (req) req.call(el).catch(()=>{});
+    } else {
+      const exit = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
+      if (exit) exit.call(document).catch(()=>{});
+    }
+  });
+  document.addEventListener('fullscreenchange', setIcon);
+  document.addEventListener('webkitfullscreenchange', setIcon);
+  document.addEventListener('msfullscreenchange', setIcon);
+
+  // Auto-scroll cue: if user scrolls past hero without picking a track, gently auto-pick relationships
+  // (disabled — let user choose explicitly)
+})();
+</script>
+</body>
+</html>
