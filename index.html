@@ -259,6 +259,13 @@ body.has-track .outro{display:block}
 }
 .ct-field input:focus,.ct-field select:focus{border-color:var(--purple);background:rgba(12,17,24,0.85)}
 .ct-field small{display:block;margin-top:5px;color:var(--cream-40);font-size:0.78rem;line-height:1.4}
+.ct-date-row{display:grid;grid-template-columns:1.25fr 0.85fr 1.05fr;gap:8px}
+.ct-date-row select{
+  background:rgba(12,17,24,0.6);border:1px solid var(--cream-18);color:var(--cream);
+  border-radius:10px;padding:11px 10px;font-family:'Questrial',sans-serif;font-size:0.94rem;
+  outline:none;transition:border-color .25s,background .25s;color-scheme:dark;width:100%;
+}
+.ct-date-row select:focus{border-color:var(--purple);background:rgba(12,17,24,0.85)}
 .ct-field input[type="checkbox"]{accent-color:var(--purple);width:auto;margin-right:8px;vertical-align:middle}
 .ct-check{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.92rem;color:var(--cream);text-transform:none;letter-spacing:0;margin-bottom:6px}
 .ct-toggle{display:inline-flex;background:var(--cream-06);border:1px solid var(--cream-18);border-radius:100px;padding:4px;width:100%}
@@ -1687,7 +1694,11 @@ body.has-track .outro{display:block}
         <h3>Birth data</h3>
         <div class="ct-field">
           <label>Date</label>
-          <input type="date" id="ct-date" value="1990-07-15" min="1900-01-01" max="2100-12-31">
+          <div class="ct-date-row">
+            <select id="ct-dateM" aria-label="Month"></select>
+            <select id="ct-dateD" aria-label="Day"></select>
+            <select id="ct-dateY" aria-label="Year"></select>
+          </div>
         </div>
         <div class="ct-field">
           <label>Time (local, 24h)</label>
@@ -1756,7 +1767,11 @@ body.has-track .outro{display:block}
         </div>
         <div class="ct-field">
           <label class="ct-check"><input type="checkbox" id="ct-transits"> Overlay current transits</label>
-          <input type="date" id="ct-transitDate" style="margin-top:8px;display:none">
+          <div class="ct-date-row" id="ct-transitDateRow" style="margin-top:8px;display:none">
+            <select id="ct-transitDateM" aria-label="Transit month"></select>
+            <select id="ct-transitDateD" aria-label="Transit day"></select>
+            <select id="ct-transitDateY" aria-label="Transit year"></select>
+          </div>
           <small id="ct-transitNote" style="display:none">Outer ring = transiting planets right now (or chosen date).</small>
         </div>
 
@@ -2624,10 +2639,92 @@ body.has-track .outro{display:block}
 
   // ───── UI wiring ─────
   const $ = id => document.getElementById(id);
-  const E_DATE = $('ct-date'), E_TIME = $('ct-time'), E_CITY = $('ct-city'), E_TZ = $('ct-tz');
+  const E_TIME = $('ct-time'), E_CITY = $('ct-city'), E_TZ = $('ct-tz');
   const E_LAT = $('ct-lat'), E_LON = $('ct-lon'), E_CUSTOM = $('ct-customRow');
   const E_HOUSES = $('ct-houses'), E_ASPECTS = $('ct-aspects');
-  const E_TRANSITS = $('ct-transits'), E_TRANSITDATE = $('ct-transitDate'), E_TRANSITNOTE = $('ct-transitNote');
+  const E_TRANSITS = $('ct-transits'), E_TRANSITDATEROW = $('ct-transitDateRow'), E_TRANSITNOTE = $('ct-transitNote');
+
+  // ───── Date triplet selects (Month / Day / Year, in that order) ─────
+  const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const E_DATE_M = $('ct-dateM'), E_DATE_D = $('ct-dateD'), E_DATE_Y = $('ct-dateY');
+  const E_TDATE_M = $('ct-transitDateM'), E_TDATE_D = $('ct-transitDateD'), E_TDATE_Y = $('ct-transitDateY');
+
+  function daysInMonth(year, month1based){
+    return new Date(Date.UTC(year, month1based, 0)).getUTCDate();
+  }
+  function buildSelect(sel, options, placeholder){
+    let html = '';
+    if (placeholder){
+      html += `<option value="" disabled selected hidden>${placeholder}</option>`;
+    }
+    html += options.map(o => `<option value="${o.v}">${o.t}</option>`).join('');
+    sel.innerHTML = html;
+  }
+  function syncDayOptions(mSel, dSel, ySel){
+    const m = parseInt(mSel.value, 10);
+    const y = parseInt(ySel.value, 10);
+    const cur = parseInt(dSel.value, 10);
+    // If month or year not yet picked, leave day at "dd" placeholder (1..31)
+    const max = (m && y) ? daysInMonth(y, m) : 31;
+    const opts = [];
+    for (let d = 1; d <= max; d++) opts.push({v:d, t:String(d)});
+    buildSelect(dSel, opts, 'dd');
+    if (cur && cur >= 1 && cur <= max) dSel.value = String(cur);
+  }
+  function initDateTriplet(mSel, dSel, ySel, defaults){
+    // Month: Jan..Dec (placeholder "mm")
+    buildSelect(mSel, MONTH_NAMES.map((n, i) => ({v:i+1, t:n})), 'mm');
+    // Year: 1900..2100 descending (placeholder "yyyy")
+    const years = [];
+    for (let y = 2100; y >= 1900; y--) years.push({v:y, t:String(y)});
+    buildSelect(ySel, years, 'yyyy');
+    // Day: starts blank with "dd" placeholder
+    buildSelect(dSel, Array.from({length:31}, (_, i) => ({v:i+1, t:String(i+1)})), 'dd');
+
+    if (defaults){
+      mSel.value = String(defaults.m);
+      ySel.value = String(defaults.y);
+      syncDayOptions(mSel, dSel, ySel);
+      dSel.value = String(defaults.d);
+    }
+
+    // Re-sync day options when month or year change
+    mSel.addEventListener('change', () => syncDayOptions(mSel, dSel, ySel));
+    ySel.addEventListener('change', () => syncDayOptions(mSel, dSel, ySel));
+  }
+  function readDateTriplet(mSel, dSel, ySel){
+    const m = parseInt(mSel.value, 10), d = parseInt(dSel.value, 10), y = parseInt(ySel.value, 10);
+    if (!m || !d || !y) return '';
+    const dt = new Date(Date.UTC(y, m-1, d));
+    if (dt.getUTCMonth() !== m-1 || dt.getUTCDate() !== d || dt.getUTCFullYear() !== y) return '';
+    return `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+  }
+  function writeDateTriplet(mSel, dSel, ySel, dateStr){
+    if (!dateStr) return;
+    const [y,m,d] = dateStr.split('-').map(Number);
+    mSel.value = String(m);
+    ySel.value = String(y);
+    syncDayOptions(mSel, dSel, ySel);
+    dSel.value = String(d);
+  }
+
+  // Birth date: starts EMPTY with mm/dd/yyyy placeholders so the user knows what to type.
+  // Transit date: pre-filled to today (only shown when the transit overlay is enabled).
+  initDateTriplet(E_DATE_M, E_DATE_D, E_DATE_Y, null);
+  const _today = new Date();
+  initDateTriplet(E_TDATE_M, E_TDATE_D, E_TDATE_Y, {
+    y: _today.getFullYear(), m: _today.getMonth()+1, d: _today.getDate()
+  });
+
+  // Shim so the rest of the code keeps using the old E_DATE / E_TRANSITDATE pattern
+  const E_DATE = {
+    get value(){ return readDateTriplet(E_DATE_M, E_DATE_D, E_DATE_Y); },
+    set value(v){ writeDateTriplet(E_DATE_M, E_DATE_D, E_DATE_Y, v); },
+  };
+  const E_TRANSITDATE = {
+    get value(){ return readDateTriplet(E_TDATE_M, E_TDATE_D, E_TDATE_Y); },
+    set value(v){ writeDateTriplet(E_TDATE_M, E_TDATE_D, E_TDATE_Y, v); },
+  };
   const E_GO = $('ct-go'), E_ERROR = $('ct-error');
   const E_WRAP = $('ct-chartWrap'), E_HOST = $('ct-chartHost'), E_TABLES = $('ct-tables');
   const E_PLACE = $('ct-placements'), E_ASPLIST = $('ct-aspectList'), E_ASPTITLE = $('ct-aspectsTitle');
@@ -2662,14 +2759,20 @@ body.has-track .outro{display:block}
     });
   });
 
+  // Today's local Y/M/D as YYYY-MM-DD (avoids the timezone shift that
+  // toISOString() introduces near midnight)
+  function localTodayStr(){
+    const t = new Date();
+    return `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`;
+  }
+
   // transit checkbox
   E_TRANSITS.addEventListener('change', () => {
     const on = E_TRANSITS.checked;
-    E_TRANSITDATE.style.display = on ? 'block' : 'none';
+    E_TRANSITDATEROW.style.display = on ? 'grid' : 'none';
     E_TRANSITNOTE.style.display = on ? 'block' : 'none';
     if (on && !E_TRANSITDATE.value){
-      const today = new Date();
-      E_TRANSITDATE.value = today.toISOString().slice(0,10);
+      E_TRANSITDATE.value = localTodayStr();
     }
   });
 
@@ -2798,7 +2901,7 @@ body.has-track .outro{display:block}
 
       let transitChart = null;
       if (E_TRANSITS.checked){
-        const tDate = E_TRANSITDATE.value || new Date().toISOString().slice(0,10);
+        const tDate = E_TRANSITDATE.value || localTodayStr();
         transitChart = computeChart({dateStr:tDate, timeStr:'12:00', tzOffset:0, lat, lon, system:houseSystem});
       }
 
@@ -2960,8 +3063,10 @@ body.has-track .outro{display:block}
     const pinPct = ((birthMs - minMs) / totalMs) * 100;
     E_SCRUB_PIN.style.left = `calc(${pinPct.toFixed(2)}% - 1px)`;
 
-    // Default to today
-    setScrubToDate(new Date());
+    // Default to today (anchor on user's local Y/M/D, not UTC, so the displayed
+    // day matches the calendar regardless of timezone offset)
+    const lt = new Date();
+    setScrubToDate(Date.UTC(lt.getFullYear(), lt.getMonth(), lt.getDate()));
   }
 
   function setScrubToDate(date){
@@ -2976,7 +3081,10 @@ body.has-track .outro{display:block}
   function getScrubMs(){
     const max = parseInt(E_SCRUB_SLIDER.max, 10) || 40000;
     const v = parseInt(E_SCRUB_SLIDER.value, 10) / max;
-    return scrubDomain.minMs + v * scrubDomain.totalMs;
+    const raw = scrubDomain.minMs + v * scrubDomain.totalMs;
+    // Snap to UTC midnight — we browse transits at day-level resolution,
+    // so the displayed calendar date never drifts because of slider quantization.
+    return Math.round(raw / 86400000) * 86400000;
   }
 
   function updateScrubFromSlider(){
@@ -3063,25 +3171,29 @@ body.has-track .outro{display:block}
   E_SCRUB_PRESETS.forEach(b => {
     b.addEventListener('click', () => {
       if (!scrubDomain) return;
-      const today = new Date();
+      // Anchor "today" at the user's LOCAL calendar date (UTC midnight on that Y/M/D),
+      // so timezone doesn't shift the displayed day by ±1.
+      const lt = new Date();
+      const todayY = lt.getFullYear(), todayM = lt.getMonth(), todayD = lt.getDate();
+      const todayMid = Date.UTC(todayY, todayM, todayD);
       const birthMs = scrubDomain.birthMs;
-      const birthY = new Date(birthMs).getUTCFullYear();
+      const bd = new Date(birthMs);
+      const bMonth = bd.getUTCMonth(), bDay = bd.getUTCDate();
       let target;
       switch(b.dataset.preset){
         case 'birth':  target = birthMs; break;
-        case '-5y':    target = today.getTime() - 5*365.25*86400*1000; break;
-        case '-1y':    target = today.getTime() - 365.25*86400*1000; break;
-        case 'today':  target = today.getTime(); break;
+        case '-5y':    target = Date.UTC(todayY - 5, todayM, todayD); break;
+        case '-1y':    target = Date.UTC(todayY - 1, todayM, todayD); break;
+        case 'today':  target = todayMid; break;
         case 'bday': {
-          // next anniversary of birth
-          const bd = new Date(birthMs);
-          const t = new Date(today.getUTCFullYear(), bd.getUTCMonth(), bd.getUTCDate());
-          target = (t.getTime() < today.getTime()) ? Date.UTC(today.getUTCFullYear()+1, bd.getUTCMonth(), bd.getUTCDate()) : t.getTime();
+          // Next anniversary of birth (or today, if birthday is today)
+          const thisYear = Date.UTC(todayY, bMonth, bDay);
+          target = (thisYear < todayMid) ? Date.UTC(todayY + 1, bMonth, bDay) : thisYear;
           break;
         }
-        case '+1y':    target = today.getTime() + 365.25*86400*1000; break;
-        case '+5y':    target = today.getTime() + 5*365.25*86400*1000; break;
-        default: target = today.getTime();
+        case '+1y':    target = Date.UTC(todayY + 1, todayM, todayD); break;
+        case '+5y':    target = Date.UTC(todayY + 5, todayM, todayD); break;
+        default: target = todayMid;
       }
       // Clamp
       target = Math.max(scrubDomain.minMs, Math.min(scrubDomain.maxMs, target));
@@ -3390,8 +3502,7 @@ body.has-track .outro{display:block}
     }
   });
 
-  // Pre-fill transit date with today
-  E_TRANSITDATE.value = new Date().toISOString().slice(0,10);
+  // (Transit date is pre-filled to today by initDateTriplet)
 
   // ════════════════════════════════════════════════════════════
   // EXPAND/COLLAPSE — placements, aspects, transit events
